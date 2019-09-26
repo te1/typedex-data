@@ -1,0 +1,4 @@
+[submodule "veekun-pokedex"]
+	path = veekun-pokedex
+	url = https://github.com/veekun/pokedex.git
+	shallow = true
