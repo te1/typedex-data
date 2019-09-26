@@ -4,6 +4,7 @@ async function main() {
   let knex;
 
   try {
+    console.log('creating database and tables...');
     knex = await init();
   } catch (err) {
     console.error(err);
