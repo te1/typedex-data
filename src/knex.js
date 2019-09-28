@@ -3,6 +3,7 @@ const Knex = require('knex');
 const config = {
   client: 'sqlite3',
   useNullAsDefault: true,
+  // asyncStackTraces: true, // debug
   connection: {
     filename: './pokedex.db',
   },

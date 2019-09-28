@@ -8,9 +8,9 @@
     "export": "node src/export"
   },
   "dependencies": {
+    "csv-parse": "^4.4.7",
     "fs-extra": "^8.1.0",
     "knex": "^0.19.4",
-    "node-csv-parse": "^1.2.0",
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
