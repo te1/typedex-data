@@ -1,4 +1,6 @@
-module.exports = {
+const Knex = require('knex');
+
+const config = {
   client: 'sqlite3',
   useNullAsDefault: true,
   connection: {
@@ -10,3 +12,8 @@ module.exports = {
     },
   },
 };
+
+const knex = Knex(config);
+
+module.exports.knex = knex;
+module.exports.config = config;

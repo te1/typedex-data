@@ -1,8 +1,7 @@
 const fs = require('fs-extra');
-const Knex = require('knex');
-const knexConfig = require('../knexfile');
+const { knex, config } = require('../knex');
 
-function createTables(knex) {
+function createTables() {
   return (
     knex.schema
       // -- Languages
@@ -116,16 +115,19 @@ function createTables(knex) {
 }
 
 // TODO version*, move*, pokemon*
+// abilities, ability_names, ability_prose, ability_flavor_text
+// evolution_chains, evolution_triggers, evolution_trigger_prose
+// items, item_names, item_prose, item_flavor_summaries, item_flavor_text
+// moves, move_names, move_flavor_summaries, move_effects, move_effect_prose, move_flavor_text
+// natures, nature_names, stats, stat_names
 
-async function init() {
-  await fs.remove(knexConfig.connection.filename);
-  await fs.ensureFile(knexConfig.connection.filename);
+async function build() {
+  console.log('creating database...');
+  await fs.remove(config.connection.filename);
+  await fs.ensureFile(config.connection.filename);
 
-  const knex = Knex(knexConfig);
-
-  await createTables(knex);
-
-  return knex;
+  console.log('creating tables...');
+  await createTables();
 }
 
-module.exports = init;
+module.exports = build;
