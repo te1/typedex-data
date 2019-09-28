@@ -48,7 +48,7 @@ const tables = [
   'ability_names',
   'ability_flavor_text',
   'item_pockets',
-  'item_pockets_names',
+  'item_pocket_names',
   'item_categories',
   'item_category_prose',
   'item_fling_effects',
@@ -56,6 +56,9 @@ const tables = [
   'items',
   'item_prose',
   'item_flavor_text',
+  'pokedexes',
+  'pokedex_prose',
+  'pokedex_version_groups',
 ];
 
 // csv parser options
@@ -75,8 +78,7 @@ async function fill() {
   for (const table of tables) {
     if (!(await knex.schema.hasTable(table))) {
       if (!debug) {
-        console.error(`Error: table ${table} missing`);
-        return;
+        throw new Error(`table ${table} missing`);
       }
       console.log(`skipping ${table}...`);
       console.log('');

@@ -40,6 +40,44 @@ async function types() {
     });
 }
 
+async function pokedexes() {
+  return knex.schema
+    .createTable('pokedexes', table => {
+      table.increments();
+      table.integer('region_id').references('regions.id');
+      table.string('identifier').notNullable();
+      table.boolean('is_main_series').notNullable();
+    })
+
+    .createTable('pokedex_prose', table => {
+      table
+        .integer('pokedex_id')
+        .references('pokedexes.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['pokedex_id', 'local_language_id']);
+    })
+
+    .createTable('pokedex_version_groups', table => {
+      table
+        .integer('pokedex_id')
+        .references('pokedexes.id')
+        .notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['pokedex_id', 'version_group_id']);
+    });
+}
+
 async function moves() {
   return knex.schema
     .createTable('moves', table => {
@@ -696,6 +734,7 @@ async function build() {
   console.log('creating tables...');
   await languages();
   await types();
+  await pokedexes();
   await moves();
   await abilities();
   await items();
