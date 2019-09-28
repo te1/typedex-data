@@ -1,124 +1,445 @@
 const fs = require('fs-extra');
 const { knex, config } = require('../knex');
 
-function createTables() {
-  return (
-    knex.schema
-      // -- Languages
-      .createTable('languages', table => {
-        table.increments();
-        table.string('iso639').notNullable();
-        table.string('iso3166').notNullable();
-        table.string('identifier').notNullable();
-        table.boolean('official').notNullable();
-        table.integer('order');
-      })
+async function types() {
+  return knex.schema
+    .createTable('types', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table
+        .integer('generation_id')
+        .references('generations.id')
+        .notNullable();
+      table.integer('damage_class_id').references('move_damage_classes.id');
+    })
 
-      .createTable('language_names', table => {
-        table
-          .integer('language_id')
-          .references('languages.id')
-          .notNullable();
-        table
-          .integer('local_language_id')
-          .references('languages.id')
-          .notNullable();
-        table.string('name').notNullable();
-        table.primary(['language_id', 'local_language_id']);
-      })
+    .createTable('type_names', table => {
+      table
+        .integer('type_id')
+        .references('types.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['type_id', 'local_language_id']);
+    })
 
-      // -- Types
-      .createTable('types', table => {
-        table.increments();
-        table.string('identifier').notNullable();
-        table
-          .integer('generation_id')
-          .references('generations.id')
-          .notNullable();
-        table.integer('damage_class_id').references('move_damage_classes.id');
-      })
-
-      .createTable('type_names', table => {
-        table
-          .integer('type_id')
-          .references('types.id')
-          .notNullable();
-        table
-          .integer('local_language_id')
-          .references('languages.id')
-          .notNullable();
-        table.string('name').notNullable();
-        table.primary(['type_id', 'local_language_id']);
-      })
-
-      .createTable('type_efficacy', table => {
-        table
-          .integer('damage_type_id')
-          .references('types.id')
-          .notNullable();
-        table
-          .integer('target_type_id')
-          .references('types.id')
-          .notNullable();
-        table.integer('damage_factor').notNullable();
-        table.primary(['damage_type_id', 'target_type_id']);
-      })
-
-      // -- Moves
-      .createTable('move_damage_classes', table => {
-        table.increments();
-        table.string('identifier').notNullable();
-      })
-
-      // -- Generations
-      .createTable('generations', table => {
-        table.increments();
-        table
-          .integer('main_region_id')
-          .references('regions.id')
-          .notNullable();
-        table.string('identifier').notNullable();
-      })
-
-      .createTable('generation_names', table => {
-        table
-          .integer('generation_id')
-          .references('generations.id')
-          .notNullable();
-        table
-          .integer('local_language_id')
-          .references('languages.id')
-          .notNullable();
-        table.string('name').notNullable();
-        table.primary(['generation_id', 'local_language_id']);
-      })
-
-      // -- Regions
-      .createTable('regions', table => {
-        table.increments();
-        table.string('identifier').notNullable();
-      })
-
-      .createTable('region_names', table => {
-        table
-          .integer('region_id')
-          .references('regions.id')
-          .notNullable();
-        table
-          .integer('local_language_id')
-          .references('languages.id')
-          .notNullable();
-        table.string('name').notNullable();
-        table.primary(['region_id', 'local_language_id']);
-      })
-  );
+    .createTable('type_efficacy', table => {
+      table
+        .integer('damage_type_id')
+        .references('types.id')
+        .notNullable();
+      table
+        .integer('target_type_id')
+        .references('types.id')
+        .notNullable();
+      table.integer('damage_factor').notNullable();
+      table.primary(['damage_type_id', 'target_type_id']);
+    });
 }
 
-// TODO version*, move*, pokemon*
+async function moves() {
+  return knex.schema
+    .createTable('moves', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table
+        .integer('generation_id')
+        .references('generations.id')
+        .notNullable();
+      table
+        .integer('type_id')
+        .references('types.id')
+        .notNullable();
+      table.integer('power');
+      table.integer('pp');
+      table.integer('accuracy');
+      table.integer('priority').notNullable();
+      table
+        .integer('target_id')
+        .references('move_targets.id')
+        .notNullable();
+      table
+        .integer('damage_class_id')
+        .references('move_damage_classes.id')
+        .notNullable();
+      table
+        .integer('effect_id')
+        .references('move_effects.id')
+        .notNullable();
+      table.integer('effect_chance');
+      table.integer('contest_type_id').references('contest_types.id');
+      table.integer('contest_effect_id').references('contest_effects.id');
+      table
+        .integer('super_contest_effect_id')
+        .references('super_contest_effects.id');
+    })
+
+    .createTable('move_names', table => {
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['move_id', 'local_language_id']);
+    })
+
+    .createTable('move_effects', table => {
+      table.increments();
+    })
+
+    .createTable('move_effect_prose', table => {
+      table
+        .integer('move_effect_id')
+        .references('move_effects.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('short_effect');
+      table.text('effect');
+      table.primary(['move_effect_id', 'local_language_id']);
+    })
+
+    .createTable('move_targets', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('move_target_prose', table => {
+      table
+        .integer('move_target_id')
+        .references('move_targets.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['move_target_id', 'local_language_id']);
+    })
+
+    .createTable('move_damage_classes', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('move_damage_class_prose', table => {
+      table
+        .integer('move_damage_class_id')
+        .references('move_damage_classes.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['move_damage_class_id', 'local_language_id']);
+    })
+
+    .createTable('move_flavor_text', table => {
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('flavor_text');
+      table.primary(['move_id', 'version_group_id', 'language_id']);
+    })
+
+    .createTable('move_flags', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('move_flag_map', table => {
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('move_flag_id')
+        .references('move_flags.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['move_id', 'move_flag_id']);
+    })
+
+    .createTable('move_flag_prose', table => {
+      table
+        .integer('move_flag_id')
+        .references('move_flags.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['move_flag_id', 'local_language_id']);
+    })
+
+    .createTable('move_meta', table => {
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('meta_category_id')
+        .references('move_meta_categories.id')
+        .notNullable();
+      table
+        .integer('meta_ailment_id')
+        .references('move_meta_ailments.id')
+        .notNullable();
+      table.integer('min_hits');
+      table.integer('max_hits');
+      table.integer('min_turns');
+      table.integer('max_turns');
+      table.integer('drain').notNullable();
+      table.integer('healing').notNullable();
+      table.integer('crit_rate').notNullable();
+      table.integer('ailment_chance').notNullable();
+      table.integer('flinch_chance').notNullable();
+      table.integer('stat_chance').notNullable();
+      table.primary(['move_id']);
+    })
+
+    .createTable('move_meta_ailments', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('move_meta_ailment_names', table => {
+      table
+        .integer('move_meta_ailment_id')
+        .references('move_meta_ailments.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['move_meta_ailment_id', 'local_language_id']);
+    })
+
+    .createTable('move_meta_categories', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('move_meta_category_prose', table => {
+      table
+        .integer('move_meta_category_id')
+        .references('move_meta_categories.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('description');
+      table.primary(['move_meta_category_id', 'local_language_id']);
+    })
+
+    .createTable('move_meta_stat_changes', table => {
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('stat_id')
+        .references('stats.id')
+        .notNullable();
+      table.integer('change').notNullable();
+      table.primary(['move_id', 'stat_id']);
+    });
+}
+
+async function languages() {
+  return knex.schema
+    .createTable('languages', table => {
+      table.increments();
+      table.string('iso639').notNullable();
+      table.string('iso3166').notNullable();
+      table.string('identifier').notNullable();
+      table.boolean('official').notNullable();
+      table.integer('order');
+    })
+
+    .createTable('language_names', table => {
+      table
+        .integer('language_id')
+        .references('languages.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['language_id', 'local_language_id']);
+    });
+}
+
+async function generations() {
+  return knex.schema
+    .createTable('generations', table => {
+      table.increments();
+      table
+        .integer('main_region_id')
+        .references('regions.id')
+        .notNullable();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('generation_names', table => {
+      table
+        .integer('generation_id')
+        .references('generations.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['generation_id', 'local_language_id']);
+    });
+}
+
+async function regions() {
+  return knex.schema
+    .createTable('regions', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('region_names', table => {
+      table
+        .integer('region_id')
+        .references('regions.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['region_id', 'local_language_id']);
+    });
+}
+
+async function verions() {
+  return knex.schema
+    .createTable('versions', table => {
+      table.increments();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('version_names', table => {
+      table
+        .integer('version_id')
+        .references('versions.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['version_id', 'local_language_id']);
+    })
+
+    .createTable('version_groups', table => {
+      table.increments();
+      table
+        .string('identifier')
+        .unique()
+        .notNullable();
+      table
+        .integer('generation_id')
+        .references('generations.id')
+        .notNullable();
+      table.integer('order');
+    })
+
+    .createTable('version_group_regions', table => {
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('region_id')
+        .references('regions.id')
+        .notNullable();
+      table.primary(['version_group_id', 'region_id']);
+    });
+}
+
+async function stats() {
+  return knex.schema
+    .createTable('stats', table => {
+      table.increments();
+      table.integer('damage_class_id').references('move_damage_classes.id');
+      table.string('identifier').notNullable();
+      table.boolean('is_battle_only').notNullable();
+      table.integer('game_index');
+    })
+
+    .createTable('stat_names', table => {
+      table
+        .integer('stat_id')
+        .references('stats.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['stat_id', 'local_language_id']);
+    });
+}
+
+async function contests() {
+  return knex.schema
+    .createTable('contest_types', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('contest_effects', table => {
+      table.increments();
+      table.integer('appeal').notNullable();
+      table.integer('jam').notNullable();
+    })
+
+    .createTable('super_contest_effects', table => {
+      table.increments();
+      table.integer('appeal').notNullable();
+    });
+}
+
+// TODO version*, pokemon*
 // abilities, ability_names, ability_prose, ability_flavor_text
 // evolution_chains, evolution_triggers, evolution_trigger_prose
 // items, item_names, item_prose, item_flavor_summaries, item_flavor_text
-// moves, move_names, move_flavor_summaries, move_effects, move_effect_prose, move_flavor_text
 // natures, nature_names, stats, stat_names
 
 async function build() {
@@ -127,7 +448,16 @@ async function build() {
   await fs.ensureFile(config.connection.filename);
 
   console.log('creating tables...');
-  await createTables();
+  await languages();
+  await types();
+  await moves();
+  await generations();
+  await regions();
+  await verions();
+  await stats();
+  await contests();
+
+  console.log('');
 }
 
 module.exports = build;

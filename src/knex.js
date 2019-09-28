@@ -1,9 +1,11 @@
 const Knex = require('knex');
 
+const debug = false;
+
 const config = {
   client: 'sqlite3',
   useNullAsDefault: true,
-  // asyncStackTraces: true, // debug
+  asyncStackTraces: debug,
   connection: {
     filename: './pokedex.db',
   },
@@ -18,3 +20,4 @@ const knex = Knex(config);
 
 module.exports.knex = knex;
 module.exports.config = config;
+module.exports.debug = debug;
