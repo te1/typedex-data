@@ -174,6 +174,53 @@ async function pokemon() {
       table.integer('trade_species_id').references('pokemon_species.id');
       table.boolean('needs_overworld_rain').notNullable();
       table.boolean('turn_upside_down').notNullable();
+    })
+
+    .createTable('pokemon_moves', table => {
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('pokemon_move_method_id')
+        .references('pokemon_move_methods.id')
+        .notNullable();
+      table.integer('level').notNullable();
+      table.integer('order');
+      table.primary([
+        'pokemon_id',
+        'version_group_id',
+        'move_id',
+        'pokemon_move_method_id',
+        'level',
+      ]);
+    })
+
+    .createTable('pokemon_move_methods', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('pokemon_move_method_prose', table => {
+      table
+        .integer('pokemon_move_method_id')
+        .references('pokemon_move_methods.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['pokemon_move_method_id', 'local_language_id']);
     });
 }
 
