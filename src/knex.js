@@ -4,7 +4,7 @@ const debug = false;
 
 const config = {
   client: 'sqlite3',
-  useNullAsDefault: true,
+  useNullAsDefault: false,
   asyncStackTraces: debug,
   connection: {
     filename: './pokedex.db',

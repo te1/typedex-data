@@ -272,6 +272,213 @@ async function moves() {
     });
 }
 
+async function abilities() {
+  return knex.schema
+    .createTable('abilities', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table
+        .integer('generation_id')
+        .references('generations.id')
+        .notNullable();
+      table.boolean('is_main_series').notNullable();
+    })
+
+    .createTable('ability_names', table => {
+      table
+        .integer('ability_id')
+        .references('abilities.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['ability_id', 'local_language_id']);
+    })
+
+    .createTable('ability_prose', table => {
+      table
+        .integer('ability_id')
+        .references('abilities.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('short_effect');
+      table.text('effect');
+      table.primary(['ability_id', 'local_language_id']);
+    })
+
+    .createTable('ability_flavor_text', table => {
+      table
+        .integer('ability_id')
+        .references('abilities.id')
+        .notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('flavor_text');
+      table.primary(['ability_id', 'version_group_id', 'language_id']);
+    });
+}
+
+async function items() {
+  return knex.schema
+    .createTable('items', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table
+        .integer('category_id')
+        .references('item_categories.id')
+        .notNullable();
+      table.integer('cost').notNullable();
+      table.integer('fling_power');
+      table.integer('fling_effect_id').references('item_fling_effects.id');
+    })
+
+    .createTable('item_names', table => {
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['item_id', 'local_language_id']);
+    })
+
+    .createTable('item_prose', table => {
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('short_effect');
+      table.text('effect');
+      table.primary(['item_id', 'local_language_id']);
+    })
+
+    .createTable('item_flavor_text', table => {
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('flavor_text');
+      table.primary(['item_id', 'version_group_id', 'language_id']);
+    })
+
+    .createTable('item_categories', table => {
+      table.increments();
+      table
+        .integer('pocket_id')
+        .references('item_pockets.id')
+        .notNullable();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('item_category_prose', table => {
+      table
+        .integer('item_category_id')
+        .references('item_categories.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.primary(['item_category_id', 'local_language_id']);
+    })
+
+    .createTable('item_fling_effects', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('item_fling_effect_prose', table => {
+      table
+        .integer('item_fling_effect_id')
+        .references('item_fling_effects.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('effect');
+      table.primary(['item_fling_effect_id', 'local_language_id']);
+    })
+
+    .createTable('item_pockets', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('item_pocket_names', table => {
+      table
+        .integer('item_pocket_id')
+        .references('item_pockets.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['item_pocket_id', 'local_language_id']);
+    })
+
+    .createTable('item_flags', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('item_flag_prose', table => {
+      table
+        .integer('item_flag_id')
+        .references('item_flags.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['item_flag_id', 'local_language_id']);
+    })
+
+    .createTable('item_flag_map', table => {
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table
+        .integer('item_flag_id')
+        .references('item_flags.id')
+        .notNullable();
+      table.string('name');
+      table.text('description');
+      table.primary(['item_id', 'item_flag_id']);
+    });
+}
+
 async function languages() {
   return knex.schema
     .createTable('languages', table => {
@@ -417,6 +624,47 @@ async function stats() {
     });
 }
 
+async function natures() {
+  return knex.schema
+    .createTable('natures', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table
+        .integer('decreased_stat_id')
+        .references('stats.id')
+        .notNullable();
+      table
+        .integer('increased_stat_id')
+        .references('stats.id')
+        .notNullable();
+      table
+        .integer('hates_flavor_id')
+        .references('contest_types.id')
+        .notNullable();
+      table
+        .integer('likes_flavor_id')
+        .references('contest_types.id')
+        .notNullable();
+      table
+        .integer('game_index')
+        .unique()
+        .notNullable();
+    })
+
+    .createTable('nature_names', table => {
+      table
+        .integer('nature_id')
+        .references('natures.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['nature_id', 'local_language_id']);
+    });
+}
+
 async function contests() {
   return knex.schema
     .createTable('contest_types', table => {
@@ -436,11 +684,9 @@ async function contests() {
     });
 }
 
-// TODO version*, pokemon*
-// abilities, ability_names, ability_prose, ability_flavor_text
+// TODO
+// pokemon*
 // evolution_chains, evolution_triggers, evolution_trigger_prose
-// items, item_names, item_prose, item_flavor_summaries, item_flavor_text
-// natures, nature_names, stats, stat_names
 
 async function build() {
   console.log('creating database...');
@@ -451,10 +697,13 @@ async function build() {
   await languages();
   await types();
   await moves();
+  await abilities();
+  await items();
   await generations();
   await regions();
   await verions();
   await stats();
+  await natures();
   await contests();
 
   console.log('');

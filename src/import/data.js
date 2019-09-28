@@ -28,6 +28,8 @@ const tables = [
   'move_damage_class_prose',
   'stats',
   'stat_names',
+  'natures',
+  'nature_names',
   'types',
   'type_names',
   'type_efficacy',
@@ -42,6 +44,18 @@ const tables = [
   'move_meta_category_prose',
   'move_meta_stat_changes',
   'move_meta',
+  'abilities',
+  'ability_names',
+  'ability_flavor_text',
+  'item_pockets',
+  'item_pockets_names',
+  'item_categories',
+  'item_category_prose',
+  'item_fling_effects',
+  'item_fling_effect_prose',
+  'items',
+  'item_prose',
+  'item_flavor_text',
 ];
 
 // csv parser options
@@ -59,6 +73,17 @@ async function fill() {
   let csv, records, chunkSize;
 
   for (const table of tables) {
+    if (!(await knex.schema.hasTable(table))) {
+      if (!debug) {
+        console.error(`Error: table ${table} missing`);
+        return;
+      }
+      console.log(`skipping ${table}...`);
+      console.log('');
+
+      continue;
+    }
+
     console.log(`loading ${table}...`);
     csv = fs.readFileSync(path.join(source, table + '.csv'));
     records = parse(csv, options);
