@@ -91,6 +91,155 @@ async function pokemon() {
       table.boolean('is_default').notNullable();
     })
 
+    .createTable('pokemon_habitats', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('pokemon_habitat_names', table => {
+      table
+        .integer('pokemon_habitat_id')
+        .references('pokemon_habitats.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['pokemon_habitat_id', 'local_language_id']);
+    })
+
+    .createTable('pokemon_shapes', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('pokemon_shape_prose', table => {
+      table
+        .integer('pokemon_shape_id')
+        .references('pokemon_shapes.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.string('awesome_name');
+      table.text('description');
+      table.primary(['pokemon_shape_id', 'local_language_id']);
+    })
+
+    .createTable('pokemon_colors', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('pokemon_color_names', table => {
+      table
+        .integer('pokemon_color_id')
+        .references('pokemon_colors.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.primary(['pokemon_color_id', 'local_language_id']);
+    })
+
+    .createTable('pokemon_evolution', table => {
+      table.increments();
+      table
+        .integer('evolved_species_id')
+        .references('pokemon_species.id')
+        .notNullable();
+      table
+        .integer('evolution_trigger_id')
+        .references('evolution_triggers.id')
+        .notNullable();
+      table.integer('trigger_item_id').references('items.id');
+      table.integer('minimum_level');
+      table.integer('gender_id').references('genders.id');
+      table.integer('location_id').references('locations.id');
+      table.integer('held_item_id').references('items.id');
+      table.string('time_of_day');
+      table.integer('known_move_id').references('moves.id');
+      table.integer('known_move_type_id').references('types.id');
+      table.integer('minimum_happiness');
+      table.integer('minimum_beauty');
+      table.integer('minimum_affection');
+      table.integer('relative_physical_stats');
+      table.integer('party_species_id').references('pokemon_species.id');
+      table.integer('party_type_id').references('types.id');
+      table.integer('trade_species_id').references('pokemon_species.id');
+      table.boolean('needs_overworld_rain').notNullable();
+      table.boolean('turn_upside_down').notNullable();
+    });
+}
+
+async function pokemon_relations() {
+  return knex.schema
+    .createTable('pokemon_stats', table => {
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('stat_id')
+        .references('stats.id')
+        .notNullable();
+      table.integer('base_stat').notNullable();
+      table.integer('effort').notNullable();
+      table.primary(['pokemon_id', 'stat_id']);
+    })
+
+    .createTable('pokemon_types', table => {
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('type_id')
+        .references('types.id')
+        .notNullable();
+      table.integer('slot');
+      table.primary(['pokemon_id', 'slot']);
+    })
+
+    .createTable('pokemon_items', table => {
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('version_id')
+        .references('versions.id')
+        .notNullable();
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table.integer('rarity').notNullable();
+      table.primary(['pokemon_id', 'version_id', 'item_id']);
+    })
+
+    .createTable('pokemon_abilities', table => {
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('ability_id')
+        .references('abilities.id')
+        .notNullable();
+      table.boolean('is_hidden').notNullable();
+      table.integer('slot').notNullable();
+      table.primary(['pokemon_id', 'slot']);
+    });
+}
+
+async function pokemon_species() {
+  return knex.schema
     .createTable('pokemon_species', table => {
       table.increments();
       table.string('identifier').notNullable();
@@ -165,62 +314,84 @@ async function pokemon() {
       table.primary(['species_id', 'version_id', 'language_id']);
     })
 
-    .createTable('pokemon_habitats', table => {
-      table.increments();
-      table.string('identifier').notNullable();
+    .createTable('pokemon_dex_numbers', table => {
+      table
+        .integer('species_id')
+        .references('pokemon_species.id')
+        .notNullable();
+      table
+        .integer('pokedex_id')
+        .references('pokedexes.id')
+        .notNullable();
+      table.integer('pokedex_number').notNullable();
+      table.unique(['pokedex_id', 'pokedex_number']);
+      table.unique(['pokedex_id', 'species_id']);
+      table.primary(['species_id', 'pokedex_id']);
     })
 
-    .createTable('pokemon_habitat_names', table => {
+    .createTable('pokemon_egg_groups', table => {
       table
-        .integer('pokemon_habitat_id')
-        .references('pokemon_habitats.id')
+        .integer('species_id')
+        .references('pokemon_species.id')
+        .notNullable();
+      table
+        .integer('egg_group_id')
+        .references('egg_groups.id')
+        .notNullable();
+      table.primary(['species_id', 'egg_group_id']);
+    });
+}
+
+async function pokemon_forms() {
+  return knex.schema
+    .createTable('pokemon_forms', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+      table.string('form_identifier');
+      table
+        .integer('pokemon_id')
+        .references('pokemon.id')
+        .notNullable();
+      table
+        .integer('introduced_in_version_group_id')
+        .references('version_groups.id');
+      table.boolean('is_default').notNullable();
+      table.boolean('is_battle_only').notNullable();
+      table.boolean('is_mega').notNullable();
+      table.integer('form_order').notNullable();
+      table.integer('order').notNullable();
+    })
+
+    .createTable('pokemon_form_names', table => {
+      table
+        .integer('pokemon_form_id')
+        .references('pokemon_forms.id')
         .notNullable();
       table
         .integer('local_language_id')
         .references('languages.id')
         .notNullable();
-      table.string('name').notNullable();
-      table.primary(['pokemon_habitat_id', 'local_language_id']);
+      table.string('form_name');
+      table.string('pokemon_name');
+      table.primary(['pokemon_form_id', 'local_language_id']);
     })
 
-    .createTable('pokemon_shapes', table => {
-      table.increments();
-      table.string('identifier').notNullable();
-    })
-
-    .createTable('pokemon_shape_prose', table => {
+    .createTable('pokemon_form_generations', table => {
       table
-        .integer('pokemon_shape_id')
-        .references('pokemon_shapes.id')
+        .integer('pokemon_form_id')
+        .references('pokemon_forms.id')
         .notNullable();
       table
-        .integer('local_language_id')
-        .references('languages.id')
+        .integer('generation_id')
+        .references('generations.id')
         .notNullable();
-      table.string('name');
-      table.string('awesome_name');
-      table.text('description');
-      table.primary(['pokemon_shape_id', 'local_language_id']);
-    })
+      table.integer('game_index').notNullable();
+      table.primary(['pokemon_form_id', 'generation_id']);
+    });
+}
 
-    .createTable('pokemon_colors', table => {
-      table.increments();
-      table.string('identifier').notNullable();
-    })
-
-    .createTable('pokemon_color_names', table => {
-      table
-        .integer('pokemon_color_id')
-        .references('pokemon_colors.id')
-        .notNullable();
-      table
-        .integer('local_language_id')
-        .references('languages.id')
-        .notNullable();
-      table.string('name').notNullable();
-      table.primary(['pokemon_color_id', 'local_language_id']);
-    })
-
+async function pokemon_misc() {
+  return knex.schema
     .createTable('growth_rates', table => {
       table.increments();
       table.string('identifier').notNullable();
@@ -262,6 +433,52 @@ async function pokemon() {
         .notNullable();
       table.string('name');
       table.primary(['evolution_trigger_id', 'local_language_id']);
+    })
+
+    .createTable('egg_groups', table => {
+      table.increments();
+      table.string('identifier').notNullable();
+    })
+
+    .createTable('egg_group_prose', table => {
+      table
+        .integer('egg_group_id')
+        .references('egg_groups.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.primary(['egg_group_id', 'local_language_id']);
+    })
+
+    .createTable('locations', table => {
+      table.increments();
+      table
+        .string('identifier')
+        .unique()
+        .notNullable();
+      table.integer('region_id').references('regions.id');
+    })
+
+    .createTable('location_names', table => {
+      table
+        .integer('location_id')
+        .references('locations.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name').notNullable();
+      table.string('subtitle');
+      table.primary(['location_id', 'local_language_id']);
+    })
+
+    .createTable('genders', table => {
+      table.increments();
+      table.string('identifier');
     });
 }
 
@@ -909,8 +1126,6 @@ async function contests() {
     });
 }
 
-// TODO pokemon
-
 async function build() {
   console.log('creating database...');
   await fs.remove(config.connection.filename);
@@ -918,20 +1133,22 @@ async function build() {
 
   console.log('creating tables...');
   await languages();
-  // await types();
-  // await pokedex();
+  await types();
+  await pokedex();
   await pokemon();
-  // await moves();
-  // await abilities();
+  await pokemon_relations();
+  await pokemon_species();
+  await pokemon_forms();
+  await pokemon_misc();
+  await moves();
+  await abilities();
   await items();
   await generations();
   await regions();
   await verions();
-  // await stats();
-  // await natures();
-  // await contests();
-
-  console.log('');
+  await stats();
+  await natures();
+  await contests();
 }
 
 module.exports = build;

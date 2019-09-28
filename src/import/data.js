@@ -63,18 +63,33 @@ const tables = [
   // 'growth_rate_prose',
   'evolution_chains',
   'evolution_triggers',
-  'evolution_trigger_prose',
+  // 'evolution_trigger_prose',
+  'egg_groups',
+  // 'egg_group_prose',
+  'locations',
+  // 'location_names',
+  'genders',
   'pokemon_habitats',
-  'pokemon_habitat_names',
+  // 'pokemon_habitat_names',
   'pokemon_shapes',
-  'pokemon_shape_prose',
+  // 'pokemon_shape_prose',
   'pokemon_colors',
-  'pokemon_color_names',
+  // 'pokemon_color_names',
   'pokemon_species',
-  'pokemon_species_names',
-  'pokemon_species_prose',
-  'pokemon_species_flavor_text',
+  // 'pokemon_species_names',
+  // 'pokemon_species_prose',
+  // 'pokemon_species_flavor_text',
+  'pokemon_dex_numbers',
   'pokemon',
+  'pokemon_forms',
+  // 'pokemon_form_names',
+  'pokemon_form_generations',
+  'pokemon_stats',
+  'pokemon_types',
+  'pokemon_items',
+  'pokemon_abilities',
+  'pokemon_egg_groups',
+  'pokemon_evolution',
 ];
 
 // list of columns that self reference with foreign keys
@@ -181,19 +196,16 @@ async function fill() {
         // throw new Error(`table ${table} missing`);
       }
       console.log(`skipping ${table}...`);
-      console.log('');
 
       continue;
     }
 
-    console.log(`loading ${table}...`);
+    process.stdout.write(`loading ${table}`);
     csv = fs.readFileSync(path.join(source, table + '.csv'));
     records = parse(csv, options);
 
-    console.log(`inserting ${records.length} rows...`);
+    process.stdout.write(`, inserting ${records.length} rows...\n`);
     await insert(table, records);
-
-    console.log('');
   }
 }
 
