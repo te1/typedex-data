@@ -18,8 +18,11 @@ const tables = [
   'versions',
   'version_names',
   'contest_types',
+  'contest_type_names',
   'contest_effects',
+  'contest_effect_prose',
   'super_contest_effects',
+  'super_contest_effect_prose',
   'move_targets',
   'move_target_prose',
   'move_effects',
@@ -40,12 +43,16 @@ const tables = [
   'move_flag_map',
   'move_flag_prose',
   'move_meta_ailments',
+  'move_meta_ailment_names',
   'move_meta_categories',
   'move_meta_category_prose',
   'move_meta_stat_changes',
   'move_meta',
+  'contest_combos',
+  'super_contest_combos',
   'abilities',
   'ability_names',
+  'ability_prose',
   'ability_flavor_text',
   'item_pockets',
   'item_pocket_names',
@@ -54,13 +61,18 @@ const tables = [
   'item_fling_effects',
   'item_fling_effect_prose',
   'items',
+  'item_names',
   'item_prose',
   'item_flavor_text',
+  'item_flags',
+  'item_flag_prose',
+  'item_flag_map',
   'pokedexes',
   'pokedex_prose',
   'pokedex_version_groups',
   'growth_rates',
   'growth_rate_prose',
+  'experience',
   'evolution_chains',
   'evolution_triggers',
   'evolution_trigger_prose',
@@ -69,6 +81,7 @@ const tables = [
   'locations',
   'location_names',
   'genders',
+  'machines',
   'pokemon_habitats',
   'pokemon_habitat_names',
   'pokemon_shapes',
@@ -92,6 +105,7 @@ const tables = [
   'pokemon_evolution',
   'pokemon_move_methods',
   'pokemon_move_method_prose',
+  'version_group_pokemon_move_methods',
   'pokemon_moves',
 ];
 
@@ -193,12 +207,10 @@ async function insert(table, allRecords) {
 async function fill() {
   let csv, records;
 
-  console.log(`${tables.length}`);
-
   for (const table of tables) {
     if (!(await knex.schema.hasTable(table))) {
       if (!debug) {
-        // throw new Error(`table ${table} missing`);
+        throw new Error(`table ${table} missing`);
       }
       console.log(`skipping ${table}...`);
 

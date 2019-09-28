@@ -221,6 +221,18 @@ async function pokemon() {
       table.string('name');
       table.text('description');
       table.primary(['pokemon_move_method_id', 'local_language_id']);
+    })
+
+    .createTable('version_group_pokemon_move_methods', table => {
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('pokemon_move_method_id')
+        .references('pokemon_move_methods.id')
+        .notNullable();
+      table.primary(['version_group_id', 'pokemon_move_method_id']);
     });
 }
 
@@ -459,6 +471,16 @@ async function pokemon_misc() {
       table.primary(['growth_rate_id', 'local_language_id']);
     })
 
+    .createTable('experience', table => {
+      table
+        .integer('growth_rate_id')
+        .references('growth_rates.id')
+        .notNullable();
+      table.integer('level').notNullable();
+      table.integer('experience').notNullable();
+      table.primary(['growth_rate_id', 'level']);
+    })
+
     .createTable('evolution_chains', table => {
       table.increments();
       table.integer('baby_trigger_item_id').references('items.id');
@@ -526,6 +548,23 @@ async function pokemon_misc() {
     .createTable('genders', table => {
       table.increments();
       table.string('identifier');
+    })
+
+    .createTable('machines', table => {
+      table.integer('machine_number').notNullable();
+      table
+        .integer('version_group_id')
+        .references('version_groups.id')
+        .notNullable();
+      table
+        .integer('item_id')
+        .references('items.id')
+        .notNullable();
+      table
+        .integer('move_id')
+        .references('moves.id')
+        .notNullable();
+      table.primary(['machine_number', 'version_group_id']);
     });
 }
 
@@ -1161,15 +1200,81 @@ async function contests() {
       table.string('identifier').notNullable();
     })
 
+    .createTable('contest_type_names', table => {
+      table
+        .integer('contest_type_id')
+        .references('contest_types.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.string('name');
+      table.text('flavor');
+      table.text('color');
+      table.primary(['contest_type_id', 'local_language_id']);
+    })
+
     .createTable('contest_effects', table => {
       table.increments();
       table.integer('appeal').notNullable();
       table.integer('jam').notNullable();
     })
 
+    .createTable('contest_effect_prose', table => {
+      table
+        .integer('contest_effect_id')
+        .references('contest_effects.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('flavor_text');
+      table.text('effect');
+      table.primary(['contest_effect_id', 'local_language_id']);
+    })
+
+    .createTable('contest_combos', table => {
+      table
+        .integer('first_move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('second_move_id')
+        .references('moves.id')
+        .notNullable();
+      table.primary(['first_move_id', 'second_move_id']);
+    })
+
     .createTable('super_contest_effects', table => {
       table.increments();
       table.integer('appeal').notNullable();
+    })
+
+    .createTable('super_contest_effect_prose', table => {
+      table
+        .integer('super_contest_effect_id')
+        .references('super_contest_effects.id')
+        .notNullable();
+      table
+        .integer('local_language_id')
+        .references('languages.id')
+        .notNullable();
+      table.text('flavor_text').notNullable();
+      table.primary(['super_contest_effect_id', 'local_language_id']);
+    })
+
+    .createTable('super_contest_combos', table => {
+      table
+        .integer('first_move_id')
+        .references('moves.id')
+        .notNullable();
+      table
+        .integer('second_move_id')
+        .references('moves.id')
+        .notNullable();
+      table.primary(['first_move_id', 'second_move_id']);
     });
 }
 
