@@ -5,11 +5,11 @@ const Type = require('../models/Type');
 const MoveDamageClass = require('../models/MoveDamageClass');
 const TypeEfficacy = require('../models/TypeEfficacy');
 
-function getTypeDamage(damages, factor) {
-  return _.map(damages, item => {
+function getDamageFactors(efficacies, prop) {
+  return _.map(efficacies, item => {
     return {
-      type: item.name,
-      factor,
+      type: item[prop].name,
+      factor: item.damage_factor / 100,
     };
   });
 }
@@ -75,22 +75,6 @@ function getTypeColor(typeName) {
   }
 }
 
-function getCategoryColor(categoryName) {
-  switch (categoryName) {
-    case 'physical':
-      return '#d76753';
-
-    case 'special':
-      return '#6483b6';
-
-    case 'status':
-      return '#b8b1a2';
-
-    default:
-      return '#999999';
-  }
-}
-
 async function exportTypes() {
   console.log('loading types...');
 
@@ -106,36 +90,44 @@ async function exportTypes() {
   // only types that have at least one pokemon
   // types = _.filter(types, type => type.pokemon.length);
 
-  // let damage, damageTaken, damageDone;
+  let damageTaken, damageDone;
 
   types = _.map(types, type => {
-    // damage = type.damage_relations;
+    damageTaken = _.filter(efficacies, { targetType: { name: type.name } });
+    damageDone = _.filter(efficacies, { damageType: { name: type.name } });
 
-    // damageTaken = [
-    //   ...getTypeDamage(damage.double_damage_from, 2),
-    //   ...getTypeDamage(damage.half_damage_from, 0.5),
-    //   ...getTypeDamage(damage.no_damage_from, 0),
-    // ];
-
-    // damageDone = [
-    //   ...getTypeDamage(damage.double_damage_to, 2),
-    //   ...getTypeDamage(damage.half_damage_to, 0.5),
-    //   ...getTypeDamage(damage.no_damage_to, 0),
-    // ];
+    damageTaken = getDamageFactors(damageTaken, 'damageType');
+    damageDone = getDamageFactors(damageDone, 'targetType');
 
     return {
       id: type.id,
       name: type.name,
       caption: type.caption,
       color: getTypeColor(type.name),
-      // damageTaken,
-      // damageDone,
+      damageTaken,
+      damageDone,
     };
   });
 
   types = _.orderBy(types, 'name');
 
   return types;
+}
+
+function getCategoryColor(categoryName) {
+  switch (categoryName) {
+    case 'physical':
+      return '#d76753';
+
+    case 'special':
+      return '#6483b6';
+
+    case 'status':
+      return '#b8b1a2';
+
+    default:
+      return '#999999';
+  }
 }
 
 async function exportCategories() {
