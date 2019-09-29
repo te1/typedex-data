@@ -24,11 +24,15 @@ class Type extends Model {
   }
 
   name() {
-    let name = _.find(this.names, { language: { identifier: 'en' } });
+    let item = _.find(this.names, { language: { identifier: 'en' } });
 
-    if (name) {
-      return name.name;
+    if (item) {
+      return item.name;
     }
+  }
+
+  static all() {
+    return Type.query().eager('names.language');
   }
 }
 
