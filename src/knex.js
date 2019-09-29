@@ -1,4 +1,5 @@
 const Knex = require('knex');
+const { Model } = require('objection');
 
 const debug = false;
 
@@ -17,6 +18,8 @@ const config = {
 };
 
 const knex = Knex(config);
+
+Model.knex(knex);
 
 module.exports.knex = knex;
 module.exports.config = config;
