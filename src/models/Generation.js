@@ -5,6 +5,15 @@ class Generation extends Model {
   static tableName = 'generations';
 
   static relationMappings = {
+    mainRegion: {
+      relation: Model.HasOneRelation,
+      modelClass: require('./Region'),
+      join: {
+        from: 'generations.main_region_id',
+        to: 'regions.id',
+      },
+    },
+
     allNames: {
       relation: Model.HasManyRelation,
       modelClass: require('./GenerationName'),
@@ -13,10 +22,19 @@ class Generation extends Model {
         to: 'generation_names.generation_id',
       },
     },
+
+    versionGroups: {
+      relation: Model.HasManyRelation,
+      modelClass: require('./VersionGroup'),
+      join: {
+        from: 'generations.id',
+        to: 'version_groups.generation_id',
+      },
+    },
   };
 
   static get hidden() {
-    return ['identifier', 'allNames'];
+    return ['identifier', 'main_region_id', 'allNames'];
   }
 
   static get virtualAttributes() {
@@ -37,7 +55,9 @@ class Generation extends Model {
   }
 
   static all() {
-    return Generation.query().eager('allNames.language');
+    return Generation.query().eager(
+      '[allNames.language, mainRegion, versionGroups]'
+    );
   }
 }
 

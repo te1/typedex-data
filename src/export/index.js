@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const { knex } = require('../knex');
+const exportGenerations = require('./generations');
 const exportTypes = require('./types');
 const exportMoves = require('./moves');
 
@@ -9,6 +10,7 @@ async function main() {
   try {
     await fs.emptyDir(target);
 
+    await exportGenerations(target);
     await exportTypes(target);
     await exportMoves(target);
   } catch (err) {

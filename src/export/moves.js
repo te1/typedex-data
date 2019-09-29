@@ -5,7 +5,6 @@ const Move = require('../models/Move');
 
 async function exportMoves(target) {
   console.log('loading moves...');
-
   let moves = await Move.all();
 
   console.log(`processing ${moves.length} moves...`);
@@ -93,6 +92,8 @@ async function exportMoves(target) {
       move
     );
   }
+
+  // TODO flags, targets
 
   console.log('done\n');
 }

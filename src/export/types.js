@@ -91,7 +91,7 @@ async function exportTypes() {
     `processing ${types.length} types, ${efficacies.length} efficacies...`
   );
 
-  types = _.filter(types, type => !_.includes(ignoredTypeNames, type.name));
+  types = _.reject(types, type => _.includes(ignoredTypeNames, type.name));
 
   let damageTaken, damageDone;
 
