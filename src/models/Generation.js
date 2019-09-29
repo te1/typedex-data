@@ -5,7 +5,7 @@ class Generation extends Model {
   static tableName = 'generations';
 
   static relationMappings = {
-    names: {
+    allNames: {
       relation: Model.HasManyRelation,
       modelClass: require('./GenerationName'),
       join: {
@@ -16,7 +16,7 @@ class Generation extends Model {
   };
 
   static get hidden() {
-    return ['identifier', 'names'];
+    return ['identifier', 'allNames'];
   }
 
   static get virtualAttributes() {
@@ -28,15 +28,16 @@ class Generation extends Model {
   }
 
   get caption() {
-    let item = _.find(this.names, { language: { identifier: 'en' } });
+    let item = _.find(this.allNames, { language: { identifier: 'en' } });
 
     if (item) {
       return item.name;
     }
+    return undefined;
   }
 
   static all() {
-    return Generation.query().eager('names.language');
+    return Generation.query().eager('allNames.language');
   }
 }
 

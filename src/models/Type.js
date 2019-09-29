@@ -5,7 +5,7 @@ class Type extends Model {
   static tableName = 'types';
 
   static relationMappings = {
-    names: {
+    allNames: {
       relation: Model.HasManyRelation,
       modelClass: require('./TypeName'),
       join: {
@@ -16,7 +16,7 @@ class Type extends Model {
   };
 
   static get hidden() {
-    return ['identifier', 'generation_id', 'damage_class_id', 'names'];
+    return ['identifier', 'generation_id', 'damage_class_id', 'allNames'];
   }
 
   static get virtualAttributes() {
@@ -28,15 +28,16 @@ class Type extends Model {
   }
 
   get caption() {
-    let item = _.find(this.names, { language: { identifier: 'en' } });
+    let item = _.find(this.allNames, { language: { identifier: 'en' } });
 
     if (item) {
       return item.name;
     }
+    return undefined;
   }
 
   static all() {
-    return Type.query().eager('names.language');
+    return Type.query().eager('allNames.language');
   }
 }
 

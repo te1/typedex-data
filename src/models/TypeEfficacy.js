@@ -29,7 +29,7 @@ class TypeEfficacy extends Model {
 
   static all() {
     return TypeEfficacy.query().eager(
-      '[damageType.names.language, targetType.names.language]'
+      '[damageType.allNames.language, targetType.allNames.language]'
     );
   }
 }

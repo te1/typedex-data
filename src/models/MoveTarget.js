@@ -1,18 +1,18 @@
 const _ = require('lodash');
 const Model = require('./BaseModel');
 
-class MoveDamageClass extends Model {
-  static tableName = 'move_damage_classes';
+class MoveTarget extends Model {
+  static tableName = 'move_targets';
 
   static relationMappings = {
     languages: {
       relation: Model.ManyToManyRelation,
       modelClass: require('./Language'),
       join: {
-        from: 'move_damage_classes.id',
+        from: 'move_targets.id',
         through: {
-          from: 'move_damage_class_prose.move_damage_class_id',
-          to: 'move_damage_class_prose.local_language_id',
+          from: 'move_target_prose.move_target_id',
+          to: 'move_target_prose.local_language_id',
           extra: ['name', 'description'],
         },
         to: 'languages.id',
@@ -49,10 +49,6 @@ class MoveDamageClass extends Model {
     }
     return undefined;
   }
-
-  static all() {
-    return MoveDamageClass.query().eager('languages');
-  }
 }
 
-module.exports = MoveDamageClass;
+module.exports = MoveTarget;

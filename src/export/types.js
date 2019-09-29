@@ -5,13 +5,19 @@ const Type = require('../models/Type');
 const TypeEfficacy = require('../models/TypeEfficacy');
 const MoveDamageClass = require('../models/MoveDamageClass');
 
+const ignoredTypeNames = ['shadow', 'unknown'];
+
 function getDamageFactors(efficacies, prop) {
-  return _.map(efficacies, item => {
+  let result = _.map(efficacies, item => {
     return {
       type: item[prop].name,
       factor: item.damage_factor / 100,
     };
   });
+
+  result = _.orderBy(result, 'factor');
+
+  return result;
 }
 
 function getTypeColor(typeName) {
@@ -85,9 +91,7 @@ async function exportTypes() {
     `processing ${types.length} types, ${efficacies.length} efficacies...`
   );
 
-  // only types that have at least one pokemon
-  // TODO
-  // types = _.filter(types, type => type.pokemon.length);
+  types = _.filter(types, type => !_.includes(ignoredTypeNames, type.name));
 
   let damageTaken, damageDone;
 

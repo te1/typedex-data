@@ -15,28 +15,31 @@ async function exportMoves(target) {
   // skip Shadow moves
   moves = _.reject(moves, move => move.type.name === 'shadow');
 
-  // let isZMove;
+  let effect, flavorTexts, isZMove;
 
   moves = _.map(moves, move => {
-    // effect = _.find(move.effect_entries, { language: { name: 'en' } });
-    // if (effect != null) {
-    //   effect = {
-    //     short: effect.short_effect,
-    //     full: effect.effect.replace(/\$effect_chance/g, move.effect_chance),
-    //   };
-    // }
+    isZMove = move.pp === 1;
 
-    // flavorTexts = _.filter(move.flavor_text_entries, {
-    //   language: { name: 'en' },
-    // });
-    // flavorTexts = _.map(flavorTexts, item => {
-    //   return {
-    //     text: item.flavor_text,
-    //     versionGroup: item.version_group.name,
-    //   };
-    // });
+    // TODO handly markdown syntax
+    effect = {
+      short: move.effect.shortEffect,
+      full: move.effect.effect,
+    };
 
-    // isZMove = move.pp === 1;
+    if (move.effect_chance != null) {
+      effect.short = effect.short.replace(
+        /\$effect_chance/g,
+        move.effect_chance
+      );
+      effect.full = effect.full.replace(/\$effect_chance/g, move.effect_chance);
+    }
+
+    flavorTexts = _.map(move.flavorTexts, item => {
+      return {
+        text: item.flavor_text,
+        versionGroup: item.versionGroup.name,
+      };
+    });
 
     return {
       id: move.id,
@@ -47,11 +50,11 @@ async function exportMoves(target) {
       power: move.power,
       accuracy: move.accuracy,
       pp: move.pp,
-      // z: isZMove,
+      z: isZMove,
       priority: move.priority,
       gen: move.generation.name,
-      // effect,
-      // flavorTexts,
+      effect,
+      flavorTexts,
     };
   });
 

@@ -17,6 +17,7 @@
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.3",
     "eslint": "^6.4.0"
   }
 }
