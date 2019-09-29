@@ -21,14 +21,18 @@ class MoveDamageClass extends Model {
   };
 
   static get hidden() {
-    return ['languages'];
+    return ['identifier', 'languages'];
   }
 
   static get virtualAttributes() {
-    return ['name', 'description'];
+    return ['name', 'caption', 'description'];
   }
 
-  name() {
+  get name() {
+    return this.identifier;
+  }
+
+  get caption() {
     let item = _.find(this.languages, { identifier: 'en' });
 
     if (item) {
@@ -36,7 +40,7 @@ class MoveDamageClass extends Model {
     }
   }
 
-  description() {
+  get description() {
     let item = _.find(this.languages, { identifier: 'en' });
 
     if (item) {

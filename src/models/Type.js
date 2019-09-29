@@ -16,14 +16,18 @@ class Type extends Model {
   };
 
   static get hidden() {
-    return ['generation_id', 'damage_class_id', 'names'];
+    return ['identifier', 'generation_id', 'damage_class_id', 'names'];
   }
 
   static get virtualAttributes() {
-    return ['name'];
+    return ['name', 'caption'];
   }
 
-  name() {
+  get name() {
+    return this.identifier;
+  }
+
+  get caption() {
     let item = _.find(this.names, { language: { identifier: 'en' } });
 
     if (item) {
