@@ -705,8 +705,6 @@ async function moves() {
         .integer('move_flag_id')
         .references('move_flags.id')
         .notNullable();
-      table.string('name');
-      table.text('description');
       table.primary(['move_id', 'move_flag_id']);
     })
 

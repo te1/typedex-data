@@ -10,12 +10,10 @@ async function exportMoves(target) {
 
   console.log(`processing ${moves.length} moves...`);
 
-  console.log(moves[0].toJSON());
-
   // skip Shadow moves
   moves = _.reject(moves, move => move.type.name === 'shadow');
 
-  let effect, flavorTexts, isZMove;
+  let isZMove, effect, flavorTexts, flags;
 
   moves = _.map(moves, move => {
     isZMove = move.pp === 1;
@@ -41,6 +39,8 @@ async function exportMoves(target) {
       };
     });
 
+    flags = _.map(move.flags, 'name');
+
     return {
       id: move.id,
       name: move.name,
@@ -55,6 +55,8 @@ async function exportMoves(target) {
       gen: move.generation.name,
       effect,
       flavorTexts,
+      flags,
+      target: move.target.name,
     };
   });
 
@@ -85,12 +87,12 @@ async function exportMoves(target) {
 
   await utils.exportData(path.join(target, 'moves/index.json'), index);
 
-  _.forEach(moves, async move => {
+  for (const move of moves) {
     await utils.exportData(
       path.join(target, 'moves', move.name + '.json'),
       move
     );
-  });
+  }
 
   console.log('done\n');
 }

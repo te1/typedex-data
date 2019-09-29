@@ -67,6 +67,19 @@ class Move extends Model {
         to: 'move_effects.id',
       },
     },
+
+    flags: {
+      relation: Model.ManyToManyRelation,
+      modelClass: require('./MoveFlag'),
+      join: {
+        from: 'moves.id',
+        through: {
+          from: 'move_flag_map.move_id',
+          to: 'move_flag_map.move_flag_id',
+        },
+        to: 'move_flags.id',
+      },
+    },
   };
 
   static get hidden() {
@@ -117,7 +130,7 @@ class Move extends Model {
 
   static all() {
     return Move.query().eager(
-      '[allNames.language, allFlavorTexts.[versionGroup, language], type, damageClass, generation, target, effect.languages]'
+      '[allNames.language, allFlavorTexts.[versionGroup, language], type, damageClass, generation, target, effect.languages, flags]'
     );
   }
 }
