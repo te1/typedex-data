@@ -2,8 +2,8 @@ const path = require('path');
 const _ = require('lodash');
 const utils = require('./utils');
 const Type = require('../models/Type');
-const MoveDamageClass = require('../models/MoveDamageClass');
 const TypeEfficacy = require('../models/TypeEfficacy');
+const MoveDamageClass = require('../models/MoveDamageClass');
 
 function getDamageFactors(efficacies, prop) {
   return _.map(efficacies, item => {
@@ -85,9 +85,8 @@ async function exportTypes() {
     `processing ${types.length} types, ${efficacies.length} efficacies...`
   );
 
-  console.log(efficacies[0].toJSON());
-
   // only types that have at least one pokemon
+  // TODO
   // types = _.filter(types, type => type.pokemon.length);
 
   let damageTaken, damageDone;
