@@ -1,11 +1,9 @@
 const path = require('path');
 const _ = require('lodash');
-const utils = require('./utils');
+const { exportData, ignoredTypeNames } = require('./utils');
 const Type = require('../models/Type');
 const TypeEfficacy = require('../models/TypeEfficacy');
 const MoveDamageClass = require('../models/MoveDamageClass');
-
-const ignoredTypeNames = ['shadow', 'unknown'];
 
 function getDamageFactors(efficacies, prop) {
   let result = _.map(efficacies, item => {
@@ -168,7 +166,7 @@ async function exportAll(target) {
     `writing ${types.length} types, ${categories.length} categories...`
   );
 
-  await utils.exportData(path.join(target, 'types.json'), data);
+  await exportData(path.join(target, 'types.json'), data);
 
   console.log('done\n');
 }

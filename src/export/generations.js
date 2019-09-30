@@ -1,12 +1,14 @@
 const path = require('path');
 const _ = require('lodash');
-const utils = require('./utils');
+const {
+  exportData,
+  ignoredVersionGroupNames,
+  ignoredMoveMethodNames,
+} = require('./utils');
 const Generation = require('../models/Generation');
 const VersionGroup = require('../models/VersionGroup');
 const Version = require('../models/Version');
 const Region = require('../models/Region');
-
-const ignoredVersionGroupNames = ['colosseum', 'xd'];
 
 async function exportRegions() {
   console.log('loading regions...');
@@ -65,7 +67,10 @@ async function exportVersionGroups() {
     regions = _.orderBy(versionGroup.regions, 'id');
     regions = _.map(regions, 'name');
 
-    moveMethods = _.orderBy(versionGroup.moveMethods, 'id');
+    moveMethods = _.reject(versionGroup.moveMethods, item =>
+      _.includes(ignoredMoveMethodNames, item.name)
+    );
+    moveMethods = _.orderBy(moveMethods, 'id');
     moveMethods = _.map(moveMethods, 'name');
 
     return {
@@ -124,14 +129,13 @@ async function exportAll(target) {
     versionGroups,
     versions,
     regions,
-    // TODO pokemonMoveMethods
   };
 
   console.log(
     `writing ${generations.length} generations, ${versionGroups.length} version groups, ${versions.length} versions, ${regions.length} regions...`
   );
 
-  await utils.exportData(path.join(target, 'generations.json'), data);
+  await exportData(path.join(target, 'generations.json'), data);
 
   console.log('done\n');
 }

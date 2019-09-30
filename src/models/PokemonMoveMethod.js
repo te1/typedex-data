@@ -49,6 +49,10 @@ class PokemonMoveMethod extends Model {
     }
     return undefined;
   }
+
+  static all() {
+    return PokemonMoveMethod.query().eager('languages');
+  }
 }
 
 module.exports = PokemonMoveMethod;
