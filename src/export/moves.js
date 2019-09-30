@@ -2,8 +2,50 @@ const path = require('path');
 const _ = require('lodash');
 const utils = require('./utils');
 const Move = require('../models/Move');
+const MoveFlag = require('../models/MoveFlag');
+const MoveTarget = require('../models/MoveTarget');
 
-async function exportMoves(target) {
+async function exportTargets() {
+  console.log('loading targets...');
+  let targets = await MoveTarget.all();
+
+  console.log(`processing ${targets.length} targets...`);
+
+  targets = _.map(targets, target => {
+    return {
+      id: target.id,
+      name: target.name,
+      caption: target.caption,
+      description: target.description, // TODO handle markdown syntax
+    };
+  });
+
+  targets = _.orderBy(targets, 'id');
+
+  return targets;
+}
+
+async function exportFlags() {
+  console.log('loading flags...');
+  let flags = await MoveFlag.all();
+
+  console.log(`processing ${flags.length} flags...`);
+
+  flags = _.map(flags, flag => {
+    return {
+      id: flag.id,
+      name: flag.name,
+      caption: flag.caption,
+      description: flag.description, // TODO handle markdown syntax
+    };
+  });
+
+  flags = _.orderBy(flags, 'id');
+
+  return flags;
+}
+
+async function exportMoves() {
   console.log('loading moves...');
   let moves = await Move.all();
 
@@ -17,7 +59,7 @@ async function exportMoves(target) {
   moves = _.map(moves, move => {
     isZMove = move.pp === 1;
 
-    // TODO handly markdown syntax
+    // TODO handle markdown syntax
     effect = {
       short: move.effect.shortEffect,
       full: move.effect.effect,
@@ -82,20 +124,39 @@ async function exportMoves(target) {
     return result;
   });
 
-  console.log(`writing ${moves.length} moves...`);
+  return {
+    index,
+    details: moves,
+  };
+}
 
-  await utils.exportData(path.join(target, 'moves/index.json'), index);
+async function exportAll(target) {
+  let moves = await exportMoves();
+  let flags = await exportFlags();
+  let targets = await exportTargets();
 
-  for (const move of moves) {
+  let data = {
+    moves: moves.index,
+    flags,
+    targets,
+  };
+
+  console.log(
+    `writing ${moves.index.length} moves, ${flags.length} flags, ${targets.length} targets...`
+  );
+
+  await utils.exportData(path.join(target, 'moves.json'), data);
+
+  console.log(`writing ${moves.details.length} move details...`);
+
+  for (const move of moves.details) {
     await utils.exportData(
       path.join(target, 'moves', move.name + '.json'),
       move
     );
   }
 
-  // TODO flags, targets
-
   console.log('done\n');
 }
 
-module.exports = exportMoves;
+module.exports = exportAll;

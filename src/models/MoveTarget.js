@@ -49,6 +49,10 @@ class MoveTarget extends Model {
     }
     return undefined;
   }
+
+  static all() {
+    return MoveTarget.query().eager('languages');
+  }
 }
 
 module.exports = MoveTarget;

@@ -49,6 +49,10 @@ class MoveFlag extends Model {
     }
     return undefined;
   }
+
+  static all() {
+    return MoveFlag.query().eager('languages');
+  }
 }
 
 module.exports = MoveFlag;
