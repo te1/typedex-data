@@ -3,6 +3,7 @@ const { knex } = require('../knex');
 const exportGenerations = require('./generations');
 const exportTypes = require('./types');
 const exportMoves = require('./moves');
+const exportAbilities = require('./abilities');
 const exportPokemon = require('./pokemon');
 
 const target = './out/';
@@ -14,7 +15,8 @@ async function main() {
     await exportGenerations(target);
     await exportTypes(target);
     await exportMoves(target);
-    await exportPokemon(target);
+    await exportAbilities(target);
+    // await exportPokemon(target);
   } catch (err) {
     console.error(err);
   }
