@@ -8,7 +8,7 @@ const config = {
   useNullAsDefault: false,
   asyncStackTraces: debug,
   connection: {
-    filename: './pokedex.db',
+    filename: './pokedex.sqlite',
   },
   pool: {
     afterCreate: (conn, cb) => {

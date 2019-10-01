@@ -4,6 +4,7 @@ const exportGenerations = require('./generations');
 const exportTypes = require('./types');
 const exportMoves = require('./moves');
 const exportAbilities = require('./abilities');
+const exportPokedex = require('./pokedex');
 const exportPokemon = require('./pokemon');
 
 const target = './out/';
@@ -16,6 +17,7 @@ async function main() {
     await exportTypes(target);
     await exportMoves(target);
     await exportAbilities(target);
+    await exportPokedex(target);
     // await exportPokemon(target);
   } catch (err) {
     console.error(err);

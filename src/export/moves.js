@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const utils = require('./utils');
+const { exportData } = require('./utils');
 const Move = require('../models/Move');
 const MoveFlag = require('../models/MoveFlag');
 const MoveTarget = require('../models/MoveTarget');
@@ -115,6 +115,7 @@ async function exportMoves() {
       'power',
       'accuracy',
       'pp',
+      'gen',
       'z',
     ]);
 
@@ -145,15 +146,12 @@ async function exportAll(target) {
     `writing ${moves.index.length} moves, ${flags.length} flags, ${targets.length} targets...`
   );
 
-  await utils.exportData(path.join(target, 'moves.json'), data);
+  await exportData(path.join(target, 'moves.json'), data);
 
   console.log(`writing ${moves.details.length} move details...`);
 
   for (const move of moves.details) {
-    await utils.exportData(
-      path.join(target, 'moves', move.name + '.json'),
-      move
-    );
+    await exportData(path.join(target, 'moves', move.name + '.json'), move);
   }
 
   console.log('done\n');

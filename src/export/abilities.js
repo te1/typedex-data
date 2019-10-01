@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const utils = require('./utils');
+const { exportData } = require('./utils');
 const Ability = require('../models/Ability');
 
 async function exportAll(target) {
@@ -37,12 +37,12 @@ async function exportAll(target) {
 
   console.log(`writing ${index.length} abilities...`);
 
-  await utils.exportData(path.join(target, 'abilities.json'), index);
+  await exportData(path.join(target, 'abilities.json'), index);
 
   console.log(`writing ${abilities.length} ability details...`);
 
   for (const ability of abilities) {
-    await utils.exportData(
+    await exportData(
       path.join(target, 'abilities', ability.name + '.json'),
       ability
     );

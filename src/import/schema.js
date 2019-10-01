@@ -72,8 +72,6 @@ async function pokedex() {
         .integer('version_group_id')
         .references('version_groups.id')
         .notNullable();
-      table.string('name');
-      table.text('description');
       table.primary(['pokedex_id', 'version_group_id']);
     });
 }
