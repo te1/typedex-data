@@ -100,17 +100,24 @@ async function exportPokemon() {
   console.log('loading pokemon...');
   let pokemon = await Pokemon.all();
 
-  // console.log(pokemon[0].types);
+  // console.log(pokemon[0].defaultForm.toJSON());
 
   console.log(`processing ${pokemon.length} pokemon...`);
 
-  let caption, height, weight, baseStats, types, moves, abilities;
+  // return {
+  //   details: [],
+  //   index: [],
+  // };
+
+  let height, weight, isMega, formCaption, baseStats, types, moves, abilities;
 
   pokemon = _.map(pokemon, pkmn => {
-    caption = ''; // TODO
-
     height = pkmn.height / 10; // convert to m
     weight = pkmn.weight / 10; // convert to kg
+
+    isMega = pkmn.defaultForm ? !!pkmn.defaultForm.is_mega : false;
+    formCaption =
+      !isMega && pkmn.defaultForm ? pkmn.defaultForm.formCaption : undefined;
 
     baseStats = _.keyBy(pkmn.baseStats, 'name');
     baseStats = _.mapValues(baseStats, 'base_stat');
@@ -124,10 +131,12 @@ async function exportPokemon() {
     return {
       id: pkmn.id,
       name: pkmn.name,
-      caption,
+      caption: pkmn.caption,
       order: pkmn.order,
       species: pkmn.species.name,
       default: !!pkmn.is_default,
+      mega: isMega,
+      form: formCaption,
       types,
       height,
       weight,
@@ -149,6 +158,8 @@ async function exportPokemon() {
       'order',
       'species',
       'default',
+      'mega',
+      'form',
       'types',
     ]);
 

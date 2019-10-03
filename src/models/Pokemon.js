@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const Model = require('./BaseModel');
 
 class Pokemon extends Model {
@@ -28,7 +29,14 @@ class Pokemon extends Model {
         },
       },
 
-      // TODO forms
+      forms: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./PokemonForm'),
+        join: {
+          from: 'pokemon.id',
+          to: 'pokemon_forms.pokemon_id',
+        },
+      },
 
       baseStats: {
         relation: Model.ManyToManyRelation,
@@ -70,22 +78,41 @@ class Pokemon extends Model {
   }
 
   static get hidden() {
-    return ['identifier', 'species_id'];
+    return ['identifier', 'caption', 'species_id'];
   }
 
   static get virtualAttributes() {
-    return ['name'];
+    return ['name', 'caption'];
   }
 
   get name() {
     return this.identifier;
   }
 
-  static all() {
-    return Pokemon.query().eager(
-      '[species, baseStats, abilities, types, ' +
-        'pokemonMoves.[move, versionGroup, moveMethod]]'
-    );
+  get caption() {
+    if (this.species && _.some(this.forms, form => !form.is_default)) {
+      return this.species.caption;
+    }
+    if (this.defaultForm && this.defaultForm.pokemonCaption) {
+      return this.defaultForm.pokemonCaption;
+    }
+    if (this.species) {
+      return this.species.caption;
+    }
+    return undefined;
+  }
+
+  get defaultForm() {
+    return _.find(this.forms, form => form.is_default);
+  }
+
+  static async all() {
+    return Pokemon.query()
+      .eagerAlgorithm(Model.NaiveEagerAlgorithm) // work around SQLITE_MAX_VARIABLE_NUMBER
+      .eager(
+        '[species.allNames.language, baseStats, abilities, types, forms.allNames.language, ' +
+          'pokemonMoves.[move, versionGroup, moveMethod]]'
+      );
   }
 }
 
