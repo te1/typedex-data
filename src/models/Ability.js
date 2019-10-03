@@ -14,6 +14,15 @@ class Ability extends Model {
       },
     },
 
+    allFlavorTexts: {
+      relation: Model.HasManyRelation,
+      modelClass: require('./AbilityFlavorText'),
+      join: {
+        from: 'abilities.id',
+        to: 'ability_flavor_text.ability_id',
+      },
+    },
+
     languages: {
       relation: Model.ManyToManyRelation,
       modelClass: require('./Language'),
@@ -53,11 +62,17 @@ class Ability extends Model {
   };
 
   static get hidden() {
-    return ['identifier', 'generation_id', 'allNames', 'languages'];
+    return [
+      'identifier',
+      'generation_id',
+      'allNames',
+      'allFlavorTexts',
+      'languages',
+    ];
   }
 
   static get virtualAttributes() {
-    return ['name', 'caption', 'shortEffect', 'effect'];
+    return ['name', 'caption', 'flavorTexts', 'shortEffect', 'effect'];
   }
 
   get name() {
@@ -69,6 +84,19 @@ class Ability extends Model {
 
     if (item) {
       return item.name;
+    }
+    return undefined;
+  }
+
+  get flavorTexts() {
+    let items = _.filter(this.allFlavorTexts, {
+      language: { identifier: 'en' },
+    });
+
+    if (items.length) {
+      items = _.orderBy(items, 'versionGroup.order', 'desc');
+
+      return items;
     }
     return undefined;
   }
@@ -93,7 +121,8 @@ class Ability extends Model {
 
   static all() {
     return Ability.query().eager(
-      '[allNames.language, languages, generation, pokemon]'
+      '[allNames.language, languages, allFlavorTexts.[versionGroup, language], ' +
+        'generation, pokemon]'
     );
   }
 }

@@ -80,6 +80,29 @@ function getEffect(move) {
   return result;
 }
 
+function getPokemon(move) {
+  let result = _.map(move.pokemonMoves, item => {
+    return {
+      pokemon: item.pokemon.name,
+      versionGroup: item.versionGroup.name,
+      method: item.moveMethod.name,
+      level: item.level,
+    };
+  });
+  result = _.reject(result, item =>
+    ignoredMoveMethodNames.includes(item.method)
+  );
+  result = _.reject(result, item =>
+    ignoredVersionGroupNames.includes(item.versionGroup)
+  );
+  result = _.groupBy(result, 'pokemon');
+  result = _.mapValues(result, group =>
+    _.map(group, item => _.omit(item, 'pokemon'))
+  );
+
+  return result;
+}
+
 async function exportMoves() {
   console.log('loading moves...');
   let moves = await Move.all();
@@ -95,6 +118,7 @@ async function exportMoves() {
     isZMove = move.pp === 1;
 
     effect = getEffect(move);
+    pokemon = getPokemon(move);
 
     flavorTexts = _.map(move.flavorTexts, item => {
       return {
@@ -104,25 +128,6 @@ async function exportMoves() {
     });
 
     flags = _.map(move.flags, 'name');
-
-    pokemon = _.map(move.pokemonMoves, item => {
-      return {
-        pokemon: item.pokemon.name,
-        versionGroup: item.versionGroup.name,
-        method: item.moveMethod.name,
-        level: item.level,
-      };
-    });
-    pokemon = _.reject(pokemon, item =>
-      ignoredMoveMethodNames.includes(item.method)
-    );
-    pokemon = _.reject(pokemon, item =>
-      ignoredVersionGroupNames.includes(item.versionGroup)
-    );
-    pokemon = _.groupBy(pokemon, 'pokemon');
-    pokemon = _.mapValues(pokemon, group =>
-      _.map(group, item => _.omit(item, 'pokemon'))
-    );
 
     return {
       id: move.id,

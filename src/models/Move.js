@@ -89,6 +89,8 @@ class Move extends Model {
         to: 'pokemon_moves.move_id',
       },
     },
+
+    // TODO machines
   };
 
   static get hidden() {

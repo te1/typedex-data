@@ -22,6 +22,20 @@ function getEffect(ability) {
   return result;
 }
 
+function getPokemon(ability) {
+  let result = _.map(ability.pokemon, item => {
+    return {
+      pokemon: item.name,
+      hidden: !!item.is_hidden,
+      slot: item.slot,
+    };
+  });
+  result = _.keyBy(result, 'pokemon');
+  result = _.mapValues(result, item => _.omit(item, 'pokemon'));
+
+  return result;
+}
+
 async function exportAll(target) {
   console.log('loading abilities...');
   let abilities = await Ability.all();
@@ -31,20 +45,18 @@ async function exportAll(target) {
   // skip non main series abilities
   abilities = _.filter(abilities, ability => ability.is_main_series);
 
-  let effect, pokemon;
+  let effect, flavorTexts, pokemon;
 
   abilities = _.map(abilities, ability => {
     effect = getEffect(ability);
+    pokemon = getPokemon(ability);
 
-    pokemon = _.map(ability.pokemon, item => {
+    flavorTexts = _.map(ability.flavorTexts, item => {
       return {
-        pokemon: item.name,
-        hidden: !!item.is_hidden,
-        slot: item.slot,
+        text: item.flavor_text,
+        versionGroup: item.versionGroup.name,
       };
     });
-    pokemon = _.keyBy(pokemon, 'pokemon');
-    pokemon = _.mapValues(pokemon, item => _.omit(item, 'pokemon'));
 
     return {
       id: ability.id,
@@ -52,6 +64,7 @@ async function exportAll(target) {
       caption: ability.caption,
       gen: ability.generation.name,
       effect,
+      flavorTexts,
       pokemon,
     };
   });

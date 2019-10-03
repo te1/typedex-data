@@ -3,6 +3,30 @@ const _ = require('lodash');
 const { exportData, ignoredVersionGroupNames } = require('./utils');
 const Pokedex = require('../models/Pokedex');
 
+function getVersionGroups(dex) {
+  let result = _.reject(dex.versionGroups, item =>
+    _.includes(ignoredVersionGroupNames, item.name)
+  );
+  result = _.orderBy(result, 'order');
+  result = _.map(result, 'name');
+
+  return result;
+}
+
+function getSpecies(dex) {
+  let result = _.orderBy(dex.species, 'pokedex_number');
+  result = _.map(result, spec => {
+    return {
+      number: spec.pokedex_number,
+      name: spec.name,
+    };
+  });
+  result = _.keyBy(result, 'number');
+  result = _.mapValues(result, 'name');
+
+  return result;
+}
+
 async function exportAll(target) {
   console.log('loading pokedex...');
   let pokedex = await Pokedex.all();
@@ -17,19 +41,8 @@ async function exportAll(target) {
   pokedex = _.map(pokedex, dex => {
     region = dex.region ? dex.region.name : null;
 
-    versionGroups = _.reject(dex.versionGroups, item =>
-      _.includes(ignoredVersionGroupNames, item.name)
-    );
-    versionGroups = _.orderBy(versionGroups, 'order');
-    versionGroups = _.map(versionGroups, 'name');
-
-    species = _.orderBy(dex.species, 'pokedex_number');
-    species = _.map(species, spec => {
-      return {
-        number: spec.pokedex_number,
-        name: spec.name,
-      };
-    });
+    versionGroups = getVersionGroups(dex);
+    species = getSpecies(dex);
 
     return {
       id: dex.id,

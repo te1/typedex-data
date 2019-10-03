@@ -18,7 +18,7 @@ async function main() {
     await exportMoves(target);
     await exportAbilities(target);
     await exportPokedex(target);
-    // await exportPokemon(target);
+    await exportPokemon(target);
   } catch (err) {
     console.error(err);
   }
