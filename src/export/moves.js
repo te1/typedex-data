@@ -49,6 +49,37 @@ async function exportFlags() {
   return flags;
 }
 
+function getEffect(move) {
+  // TODO handle markdown syntax
+
+  let result = {
+    short: move.effect.shortEffect,
+    full: move.effect.effect,
+  };
+
+  // filter out texts that start with XXX as they are placeholders
+  if (_.startsWith(result.short, 'XXX')) {
+    delete result.short;
+  }
+  if (_.startsWith(result.full, 'XXX')) {
+    delete result.full;
+  }
+
+  if (move.effect_chance != null) {
+    if (result.short) {
+      result.short = result.short.replace(
+        /\$effect_chance/g,
+        move.effect_chance
+      );
+    }
+    if (result.full) {
+      result.full = result.full.replace(/\$effect_chance/g, move.effect_chance);
+    }
+  }
+
+  return result;
+}
+
 async function exportMoves() {
   console.log('loading moves...');
   let moves = await Move.all();
@@ -63,19 +94,7 @@ async function exportMoves() {
   moves = _.map(moves, move => {
     isZMove = move.pp === 1;
 
-    // TODO handle markdown syntax
-    effect = {
-      short: move.effect.shortEffect,
-      full: move.effect.effect,
-    };
-
-    if (move.effect_chance != null) {
-      effect.short = effect.short.replace(
-        /\$effect_chance/g,
-        move.effect_chance
-      );
-      effect.full = effect.full.replace(/\$effect_chance/g, move.effect_chance);
-    }
+    effect = getEffect(move);
 
     flavorTexts = _.map(move.flavorTexts, item => {
       return {
@@ -175,7 +194,7 @@ async function exportAll(target) {
   console.log(`writing ${moves.details.length} move details...`);
 
   for (const move of moves.details) {
-    await exportData(path.join(target, 'moves', move.name + '.json'), move);
+    await exportData(path.join(target, 'move', move.name + '.json'), move);
   }
 
   console.log('done\n');

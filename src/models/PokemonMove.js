@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const Model = require('./BaseModel');
 
 class PokemonMove extends Model {

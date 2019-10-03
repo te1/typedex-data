@@ -36,6 +36,20 @@ class Ability extends Model {
         to: 'generations.id',
       },
     },
+
+    pokemon: {
+      relation: Model.ManyToManyRelation,
+      modelClass: require('./Pokemon'),
+      join: {
+        from: 'abilities.id',
+        through: {
+          from: 'pokemon_abilities.ability_id',
+          to: 'pokemon_abilities.pokemon_id',
+          extra: ['is_hidden', 'slot'],
+        },
+        to: 'pokemon.id',
+      },
+    },
   };
 
   static get hidden() {
@@ -78,7 +92,9 @@ class Ability extends Model {
   }
 
   static all() {
-    return Ability.query().eager('[allNames.language, languages, generation]');
+    return Ability.query().eager(
+      '[allNames.language, languages, generation, pokemon]'
+    );
   }
 }
 
