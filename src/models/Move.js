@@ -80,6 +80,15 @@ class Move extends Model {
         to: 'move_flags.id',
       },
     },
+
+    pokemonMoves: {
+      relation: Model.HasManyRelation,
+      modelClass: require('./PokemonMove'),
+      join: {
+        from: 'moves.id',
+        to: 'pokemon_moves.move_id',
+      },
+    },
   };
 
   static get hidden() {
@@ -130,7 +139,9 @@ class Move extends Model {
 
   static all() {
     return Move.query().eager(
-      '[allNames.language, allFlavorTexts.[versionGroup, language], type, damageClass, generation, target, effect.languages, flags]'
+      '[allNames.language, allFlavorTexts.[versionGroup, language], ' +
+        'type, damageClass, generation, target, effect.languages, flags, ' +
+        'pokemonMoves.[pokemon, versionGroup, moveMethod]]'
     );
   }
 }

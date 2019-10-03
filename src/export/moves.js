@@ -1,6 +1,10 @@
 const path = require('path');
 const _ = require('lodash');
-const { exportData } = require('./utils');
+const {
+  exportData,
+  ignoredVersionGroupNames,
+  ignoredMoveMethodNames,
+} = require('./utils');
 const Move = require('../models/Move');
 const MoveFlag = require('../models/MoveFlag');
 const MoveTarget = require('../models/MoveTarget');
@@ -54,7 +58,7 @@ async function exportMoves() {
   // skip Shadow moves
   moves = _.reject(moves, move => move.type.name === 'shadow');
 
-  let isZMove, effect, flavorTexts, flags;
+  let isZMove, effect, flavorTexts, flags, pokemon;
 
   moves = _.map(moves, move => {
     isZMove = move.pp === 1;
@@ -82,6 +86,25 @@ async function exportMoves() {
 
     flags = _.map(move.flags, 'name');
 
+    pokemon = _.map(move.pokemonMoves, item => {
+      return {
+        pokemon: item.pokemon.name,
+        versionGroup: item.versionGroup.name,
+        method: item.moveMethod.name,
+        level: item.level,
+      };
+    });
+    pokemon = _.reject(pokemon, item =>
+      ignoredMoveMethodNames.includes(item.method)
+    );
+    pokemon = _.reject(pokemon, item =>
+      ignoredVersionGroupNames.includes(item.versionGroup)
+    );
+    pokemon = _.groupBy(pokemon, 'pokemon');
+    pokemon = _.mapValues(pokemon, group =>
+      _.map(group, item => _.omit(item, 'pokemon'))
+    );
+
     return {
       id: move.id,
       name: move.name,
@@ -98,6 +121,7 @@ async function exportMoves() {
       flavorTexts,
       flags,
       target: move.target.name,
+      pokemon,
     };
   });
 

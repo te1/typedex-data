@@ -1,5 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
+const roman = require('romans');
 const {
   exportData,
   ignoredVersionGroupNames,
@@ -93,7 +94,7 @@ async function exportGenerations() {
 
   console.log(`processing ${generations.length} generations...`);
 
-  let versionGroups;
+  let versionGroups, numRoman, num;
 
   generations = _.map(generations, generation => {
     versionGroups = _.reject(generation.versionGroups, item =>
@@ -102,12 +103,15 @@ async function exportGenerations() {
     versionGroups = _.orderBy(versionGroups, 'order');
     versionGroups = _.map(versionGroups, 'name');
 
+    numRoman = generation.caption.split(' ')[1];
+    num = roman.deromanize(numRoman);
+
     return {
       id: generation.id,
       name: generation.name,
       caption: generation.caption,
-      caption2: generation.caption.replace(/Generation/, 'Gen'),
-      caption3: generation.caption.replace(/Generation /, ''),
+      numRoman,
+      num,
       versionGroups,
       mainRegion: generation.mainRegion.name,
     };

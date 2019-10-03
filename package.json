@@ -14,6 +14,7 @@
     "lodash": "^4.17.15",
     "objection": "^1.6.11",
     "objection-visibility": "^0.4.0",
+    "romans": "^1.0.2",
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
