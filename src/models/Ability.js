@@ -72,7 +72,14 @@ class Ability extends Model {
   }
 
   static get virtualAttributes() {
-    return ['name', 'caption', 'flavorTexts', 'shortEffect', 'effect'];
+    return [
+      'name',
+      'caption',
+      'flavorTexts',
+      'flavorText',
+      'shortEffect',
+      'effect',
+    ];
   }
 
   get name() {
@@ -97,6 +104,16 @@ class Ability extends Model {
       items = _.orderBy(items, 'versionGroup.order', 'desc');
 
       return items;
+    }
+    return undefined;
+  }
+
+  get flavorText() {
+    // only the latest flavor text
+
+    let flavorTexts = this.flavorTexts;
+    if (flavorTexts && flavorTexts.length) {
+      return flavorTexts[0];
     }
     return undefined;
   }

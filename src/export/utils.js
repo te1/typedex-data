@@ -1,8 +1,14 @@
 const fs = require('fs-extra');
 
-const spaces = 2;
+const config = {
+  prettyPrintJson: true,
+  includeIds: false,
+  allFlavorTexts: false,
+};
 
 async function exportData(file, data) {
+  let spaces = config.prettyPrintJson ? 2 : 0;
+
   return await fs.outputJson(file, data, { spaces });
 }
 
@@ -17,6 +23,7 @@ const ignoredMoveMethodNames = [
   'xd-purification',
 ];
 
+module.exports.config = config;
 module.exports.exportData = exportData;
 module.exports.ignoredTypeNames = ignoredTypeNames;
 module.exports.ignoredVersionGroupNames = ignoredVersionGroupNames;

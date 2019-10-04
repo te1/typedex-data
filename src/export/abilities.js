@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const { exportData } = require('./utils');
+const { config, exportData } = require('./utils');
 const Ability = require('../models/Ability');
 
 function getEffect(ability) {
@@ -33,7 +33,22 @@ function getPokemon(ability) {
   result = _.keyBy(result, 'pokemon');
   result = _.mapValues(result, item => _.omit(item, 'pokemon'));
 
+  // compactify
+  result = _.mapValues(result, item => (item.hidden ? 'hidden' : item.slot));
+
   return result;
+}
+
+function getFlavorText(ability) {
+  if (config.allFlavorTexts) {
+    return _.map(ability.flavorTexts, item => {
+      return {
+        text: item.flavor_text,
+        versionGroup: item.versionGroup.name,
+      };
+    });
+  }
+  return ability.flavorText.flavor_text;
 }
 
 async function exportAll(target) {
@@ -45,18 +60,12 @@ async function exportAll(target) {
   // skip non main series abilities
   abilities = _.filter(abilities, ability => ability.is_main_series);
 
-  let effect, flavorTexts, pokemon;
+  let effect, flavorText, pokemon;
 
   abilities = _.map(abilities, ability => {
     effect = getEffect(ability);
+    flavorText = getFlavorText(ability);
     pokemon = getPokemon(ability);
-
-    flavorTexts = _.map(ability.flavorTexts, item => {
-      return {
-        text: item.flavor_text,
-        versionGroup: item.versionGroup.name,
-      };
-    });
 
     return {
       id: ability.id,
@@ -64,12 +73,16 @@ async function exportAll(target) {
       caption: ability.caption,
       gen: ability.generation.name,
       effect,
-      flavorTexts,
+      flavorText,
       pokemon,
     };
   });
 
   abilities = _.orderBy(abilities, 'name');
+
+  if (!config.includeIds) {
+    abilities = _.map(abilities, item => _.omit(item, 'id'));
+  }
 
   let index = _.map(abilities, ability => {
     return _.pick(ability, ['id', 'name', 'caption', 'gen']);
