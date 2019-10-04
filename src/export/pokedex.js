@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const { exportData, ignoredVersionGroupNames } = require('./utils');
+const { config, exportData, ignoredVersionGroupNames } = require('./utils');
 const Pokedex = require('../models/Pokedex');
 
 function getVersionGroups(dex) {
@@ -56,6 +56,14 @@ async function exportAll(target) {
   });
 
   pokedex = _.orderBy(pokedex, 'id');
+
+  if (config.removeIds) {
+    pokedex = _.map(pokedex, item => _.omit(item, 'id'));
+  }
+
+  if (config.removeRegions) {
+    pokedex = _.map(pokedex, item => _.omit(item, 'region'));
+  }
 
   let index = _.map(pokedex, dex => {
     return _.pick(dex, [
