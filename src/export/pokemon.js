@@ -100,7 +100,7 @@ async function exportPokemon() {
   console.log('loading pokemon...');
   let pokemon = await Pokemon.all();
 
-  // console.log(pokemon[0].defaultForm.toJSON());
+  // console.log(pokemon[0].species.toJSON());
 
   console.log(`processing ${pokemon.length} pokemon...`);
 
@@ -109,15 +109,13 @@ async function exportPokemon() {
   //   index: [],
   // };
 
-  let height, weight, isMega, formCaption, baseStats, types, moves, abilities;
+  let height, weight, baseStats, types, moves, abilities;
+  let isMega, formCaption;
+  let gen, color, flavorTexts;
 
   pokemon = _.map(pokemon, pkmn => {
     height = pkmn.height / 10; // convert to m
     weight = pkmn.weight / 10; // convert to kg
-
-    isMega = pkmn.defaultForm ? !!pkmn.defaultForm.is_mega : false;
-    formCaption =
-      !isMega && pkmn.defaultForm ? pkmn.defaultForm.formCaption : undefined;
 
     baseStats = _.keyBy(pkmn.baseStats, 'name');
     baseStats = _.mapValues(baseStats, 'base_stat');
@@ -128,19 +126,35 @@ async function exportPokemon() {
     moves = getMoves(pkmn);
     abilities = getAbilities(pkmn);
 
+    isMega = !!pkmn.defaultForm.is_mega;
+    formCaption = isMega ? undefined : pkmn.defaultForm.formCaption;
+
+    gen = pkmn.species.generation.name;
+    color = pkmn.species.color.name;
+
+    flavorTexts = _.map(pkmn.species.flavorTexts, item => {
+      return {
+        text: item.flavor_text,
+        version: item.version.name,
+      };
+    });
+
     return {
       id: pkmn.id,
       name: pkmn.name,
       caption: pkmn.caption,
       order: pkmn.order,
+      types,
       species: pkmn.species.name,
+      gen,
+      color,
       default: !!pkmn.is_default,
       mega: isMega,
       form: formCaption,
-      types,
       height,
       weight,
       baseStats,
+      flavorTexts,
       moves,
       abilities,
     };
@@ -157,10 +171,11 @@ async function exportPokemon() {
       'caption',
       'order',
       'species',
+      'types',
+      'gen',
       'default',
       'mega',
       'form',
-      'types',
     ]);
 
     // drop undefined, null and false values

@@ -37,11 +37,42 @@ class PokemonSpecies extends Model {
       },
     },
 
-    // TODO other relations
+    generation: {
+      relation: Model.HasOneRelation,
+      modelClass: require('./Generation'),
+      join: {
+        from: 'pokemon_species.generation_id',
+        to: 'generations.id',
+      },
+    },
+
+    color: {
+      relation: Model.HasOneRelation,
+      modelClass: require('./PokemonColor'),
+      join: {
+        from: 'pokemon_species.color_id',
+        to: 'pokemon_colors.id',
+      },
+    },
+
+    // TODO evolutions, evolution_chains
+
+    // unused: shapes, habitats, growth_rates, egg_groups
   };
 
   static get hidden() {
-    return ['identifier', 'allNames', 'languages', 'allFlavorTexts'];
+    return [
+      'identifier',
+      'generation_id',
+      'color_id',
+      'shape_id',
+      'habitat_id',
+      'growth_rate_id',
+      'conquest_order',
+      'allNames',
+      'languages',
+      'allFlavorTexts',
+    ];
   }
 
   static get virtualAttributes() {

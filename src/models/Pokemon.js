@@ -110,7 +110,9 @@ class Pokemon extends Model {
     return Pokemon.query()
       .eagerAlgorithm(Model.NaiveEagerAlgorithm) // work around SQLITE_MAX_VARIABLE_NUMBER
       .eager(
-        '[species.allNames.language, baseStats, abilities, types, forms.allNames.language, ' +
+        '[species.[allNames.language, languages, allFlavorTexts.[version.versionGroup, language], ' +
+          'generation, color], ' +
+          'baseStats, abilities, types, forms.allNames.language, ' +
           'pokemonMoves.[move, versionGroup, moveMethod]]'
       );
   }
