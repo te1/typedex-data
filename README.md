@@ -32,7 +32,9 @@ npm run import
 
 ## Export
 
-```npm run export```
+```
+npm run export
+```
 
 - Uses [Objection.js](https://github.com/Vincit/objection.js) to query the database
 - Uses [lodash](https://github.com/lodash/lodash) to transform the data
