@@ -7,6 +7,7 @@ const config = {
   shortenGenerationInfo: true,
   keepDamageFactorOne: false,
   onlyLatestFlavorText: true,
+  simpleStats: true,
   simplePokemonMoves: true,
   targetVersionGroup: 'ultra-sun-ultra-moon',
 };

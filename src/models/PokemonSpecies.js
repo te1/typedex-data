@@ -100,7 +100,7 @@ class PokemonSpecies extends Model {
   }
 
   static get virtualAttributes() {
-    return ['name', 'caption', 'formDescription', 'flavorTexts'];
+    return ['name', 'caption', 'formDescription', 'flavorTexts', 'flavorText'];
   }
 
   get name() {
@@ -134,6 +134,16 @@ class PokemonSpecies extends Model {
       items = _.orderBy(items, 'version.versionGroup.order', 'desc');
 
       return items;
+    }
+    return undefined;
+  }
+
+  get flavorText() {
+    // only the latest flavor text
+
+    let flavorTexts = this.flavorTexts;
+    if (flavorTexts && flavorTexts.length) {
+      return flavorTexts[0];
     }
     return undefined;
   }

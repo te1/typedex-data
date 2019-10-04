@@ -82,7 +82,7 @@ class Pokemon extends Model {
   }
 
   static get virtualAttributes() {
-    return ['name', 'caption'];
+    return ['name', 'caption', 'moves'];
   }
 
   get name() {
@@ -104,6 +104,15 @@ class Pokemon extends Model {
 
   get defaultForm() {
     return _.find(this.forms, form => form.is_default);
+  }
+
+  get moves() {
+    let result = _.groupBy(this.pokemonMoves, 'move.name');
+    result = _.mapValues(result, group =>
+      _.orderBy(group, 'versionGroup.order', 'desc')
+    );
+
+    return result;
   }
 
   static async all() {

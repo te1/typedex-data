@@ -1,6 +1,7 @@
 const path = require('path');
 const _ = require('lodash');
 const {
+  config,
   exportData,
   ignoredMoveMethodNames,
   ignoredVersionGroupNames,
@@ -33,6 +34,16 @@ async function exportStats() {
 
   stats = _.orderBy(stats, 'id');
 
+  if (config.removeIds) {
+    stats = _.map(stats, item => _.omit(item, 'id'));
+  }
+
+  if (config.simpleStats) {
+    stats = _.map(stats, item =>
+      _.omit(item, ['damageCategory', 'battleOnly'])
+    );
+  }
+
   return stats;
 }
 
@@ -54,6 +65,10 @@ async function exportNatures() {
 
   natures = _.orderBy(natures, 'id');
 
+  if (config.removeIds) {
+    natures = _.map(natures, item => _.omit(item, 'id'));
+  }
+
   return natures;
 }
 
@@ -72,6 +87,10 @@ async function exportEvolutionTriggers() {
   });
 
   triggers = _.orderBy(triggers, 'id');
+
+  if (config.removeIds) {
+    triggers = _.map(triggers, item => _.omit(item, 'id'));
+  }
 
   return triggers;
 }
@@ -97,28 +116,41 @@ async function exportMoveMethods() {
 
   moveMethods = _.orderBy(moveMethods, 'id');
 
+  if (config.removeIds) {
+    moveMethods = _.map(moveMethods, item => _.omit(item, 'id'));
+  }
+
   return moveMethods;
 }
 
 function getMoves(pkmn) {
-  let result = _.map(pkmn.pokemonMoves, item => {
-    return {
-      move: item.move.name,
-      versionGroup: item.versionGroup.name,
-      method: item.moveMethod.name,
-      level: item.level,
-    };
+  let result = _.mapValues(pkmn.moves, group => {
+    let move = _.map(group, item => {
+      return {
+        versionGroup: item.versionGroup.name,
+        method: item.moveMethod.name,
+        level: item.level,
+      };
+    });
+
+    move = _.reject(move, item =>
+      ignoredVersionGroupNames.includes(item.versionGroup)
+    );
+    move = _.reject(move, item => ignoredMoveMethodNames.includes(item.method));
+
+    if (config.targetVersionGroup) {
+      move = _.filter(move, { versionGroup: config.targetVersionGroup });
+    }
+
+    if (config.simplePokemonMoves) {
+      move = _.map(move, 'method');
+      move = _.uniq(move);
+    }
+
+    return move;
   });
-  result = _.reject(result, item =>
-    ignoredMoveMethodNames.includes(item.method)
-  );
-  result = _.reject(result, item =>
-    ignoredVersionGroupNames.includes(item.versionGroup)
-  );
-  result = _.groupBy(result, 'move');
-  result = _.mapValues(result, group =>
-    _.map(group, item => _.omit(item, 'move'))
-  );
+
+  result = _.omitBy(result, item => item.length === 0);
 
   return result;
 }
@@ -135,7 +167,22 @@ function getAbilities(pkmn) {
   result = _.keyBy(result, 'ability');
   result = _.mapValues(result, item => _.omit(item, 'ability'));
 
+  // compactify
+  result = _.mapValues(result, item => (item.hidden ? 'hidden' : item.slot));
+
   return result;
+}
+
+function getFlavorText(species) {
+  if (config.onlyLatestFlavorText) {
+    return species.flavorText.flavor_text;
+  }
+  return _.map(species.flavorTexts, item => {
+    return {
+      text: item.flavor_text,
+      versionGroup: item.versionGroup.name,
+    };
+  });
 }
 
 async function exportPokemon() {
@@ -151,9 +198,9 @@ async function exportPokemon() {
   //   index: [],
   // };
 
-  let height, weight, baseStats, types, moves, abilities;
+  let height, weight, baseStats, isDefault, types, moves, abilities;
   let isMega, formCaption;
-  let gen, color, flavorTexts;
+  let gen, color, flavorText;
 
   pokemon = _.map(pokemon, pkmn => {
     height = pkmn.height / 10; // convert to m
@@ -168,18 +215,14 @@ async function exportPokemon() {
     moves = getMoves(pkmn);
     abilities = getAbilities(pkmn);
 
+    isDefault = !!pkmn.is_default;
+
     isMega = !!pkmn.defaultForm.is_mega;
     formCaption = isMega ? undefined : pkmn.defaultForm.formCaption;
 
     gen = pkmn.species.generation.name;
     color = pkmn.species.color.name;
-
-    flavorTexts = _.map(pkmn.species.flavorTexts, item => {
-      return {
-        text: item.flavor_text,
-        version: item.version.name,
-      };
-    });
+    flavorText = getFlavorText(pkmn.species);
 
     return {
       id: pkmn.id,
@@ -190,20 +233,27 @@ async function exportPokemon() {
       species: pkmn.species.name,
       gen,
       color,
-      default: !!pkmn.is_default,
+      default: isDefault,
+      alternate: !isDefault && !isMega,
       mega: isMega,
       form: formCaption,
       height,
       weight,
       baseStats,
       evolutionChain: pkmn.species.evolutionChain.chain,
-      flavorTexts,
+      flavorText,
       moves,
       abilities,
     };
   });
 
   pokemon = _.orderBy(pokemon, 'order');
+
+  if (config.removeIds) {
+    pokemon = _.map(pokemon, item => _.omit(item, 'id'));
+  }
+
+  pokemon = _.map(pokemon, item => _.omit(item, ['order', '']));
 
   let result;
 
@@ -216,7 +266,7 @@ async function exportPokemon() {
       'species',
       'types',
       'gen',
-      'default',
+      'alternate',
       'mega',
       'form',
     ]);
