@@ -9,6 +9,7 @@ const Stat = require('../models/Stat');
 const Nature = require('../models/Nature');
 const Pokemon = require('../models/Pokemon');
 const PokemonMoveMethod = require('../models/PokemonMoveMethod');
+const Evolutiontrigger = require('../models/Evolutiontrigger');
 
 async function exportStats() {
   console.log('loading stats...');
@@ -54,6 +55,25 @@ async function exportNatures() {
   natures = _.orderBy(natures, 'id');
 
   return natures;
+}
+
+async function exportEvolutionTriggers() {
+  console.log('loading evolution triggers...');
+  let triggers = await Evolutiontrigger.all();
+
+  console.log(`processing ${triggers.length} evolution triggers...`);
+
+  triggers = _.map(triggers, trigger => {
+    return {
+      id: trigger.id,
+      name: trigger.name,
+      caption: trigger.caption,
+    };
+  });
+
+  triggers = _.orderBy(triggers, 'id');
+
+  return triggers;
 }
 
 async function exportMoveMethods() {
@@ -176,6 +196,7 @@ async function exportPokemon() {
       height,
       weight,
       baseStats,
+      evolutionChain: pkmn.species.evolutionChain.chain,
       flavorTexts,
       moves,
       abilities,
@@ -215,18 +236,22 @@ async function exportPokemon() {
 async function exportAll(target) {
   let pokemon = await exportPokemon();
   let moveMethods = await exportMoveMethods();
+  let evolutionTriggers = await exportEvolutionTriggers();
   let stats = await exportStats();
   let natures = await exportNatures();
 
   let data = {
     pokemon: pokemon.index,
     moveMethods,
+    evolutionTriggers,
     stats,
     natures,
   };
 
   console.log(
-    `writing ${pokemon.index.length} pokemon, ${moveMethods.length} move methods, ${stats.length} stats, ${natures.length}...`
+    `writing ${pokemon.index.length} pokemon, ${moveMethods.length} move methods, ` +
+      `${evolutionTriggers.length} evolution triggers, ${stats.length} stats, ` +
+      `${natures.length} natures...`
   );
 
   await exportData(path.join(target, 'pokemon.json'), data);

@@ -55,7 +55,32 @@ class PokemonSpecies extends Model {
       },
     },
 
-    // TODO evolutions, evolution_chains
+    evolvesFromSpecies: {
+      relation: Model.HasOneRelation,
+      modelClass: PokemonSpecies,
+      join: {
+        from: 'pokemon_species.evolves_from_species_id',
+        to: 'pokemon_species.id',
+      },
+    },
+
+    evolutionChain: {
+      relation: Model.HasOneRelation,
+      modelClass: require('./EvolutionChain'),
+      join: {
+        from: 'pokemon_species.evolution_chain_id',
+        to: 'evolution_chains.id',
+      },
+    },
+
+    evolutionDetails: {
+      relation: Model.HasManyRelation,
+      modelClass: require('./PokemonEvolution'),
+      join: {
+        from: 'pokemon_species.id',
+        to: 'pokemon_evolution.evolved_species_id',
+      },
+    },
 
     // unused: shapes, habitats, growth_rates, egg_groups
   };
@@ -65,6 +90,8 @@ class PokemonSpecies extends Model {
       'identifier',
       'generation_id',
       'color_id',
+      'evolves_from_species_id',
+      'evolution_chain_id',
       'conquest_order',
       'allNames',
       'languages',
