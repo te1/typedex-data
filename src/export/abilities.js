@@ -40,15 +40,15 @@ function getPokemon(ability) {
 }
 
 function getFlavorText(ability) {
-  if (config.allFlavorTexts) {
-    return _.map(ability.flavorTexts, item => {
-      return {
-        text: item.flavor_text,
-        versionGroup: item.versionGroup.name,
-      };
-    });
+  if (config.onlyLatestFlavorText) {
+    return ability.flavorText.flavor_text;
   }
-  return ability.flavorText.flavor_text;
+  return _.map(ability.flavorTexts, item => {
+    return {
+      text: item.flavor_text,
+      versionGroup: item.versionGroup.name,
+    };
+  });
 }
 
 async function exportAll(target) {
@@ -80,7 +80,7 @@ async function exportAll(target) {
 
   abilities = _.orderBy(abilities, 'name');
 
-  if (!config.includeIds) {
+  if (config.removeIds) {
     abilities = _.map(abilities, item => _.omit(item, 'id'));
   }
 

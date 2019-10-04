@@ -2,8 +2,10 @@ const fs = require('fs-extra');
 
 const config = {
   prettyPrintJson: true,
-  includeIds: false,
-  allFlavorTexts: false,
+  removeIds: true,
+  onlyLatestFlavorText: true,
+  simplePokemonMoves: true,
+  targetVersionGroup: 'ultra-sun-ultra-moon',
 };
 
 async function exportData(file, data) {

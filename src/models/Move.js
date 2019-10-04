@@ -106,11 +106,12 @@ class Move extends Model {
       'super_contest_effect_id',
       'allNames',
       'allFlavorTexts',
+      'pokemonMoves',
     ];
   }
 
   static get virtualAttributes() {
-    return ['name', 'caption', 'flavorTexts'];
+    return ['name', 'caption', 'flavorTexts', 'pokemon'];
   }
 
   get name() {
@@ -137,6 +138,25 @@ class Move extends Model {
       return items;
     }
     return undefined;
+  }
+
+  get flavorText() {
+    // only the latest flavor text
+
+    let flavorTexts = this.flavorTexts;
+    if (flavorTexts && flavorTexts.length) {
+      return flavorTexts[0];
+    }
+    return undefined;
+  }
+
+  get pokemon() {
+    let result = _.groupBy(this.pokemonMoves, 'pokemon.name');
+    result = _.mapValues(result, group =>
+      _.orderBy(group, 'versionGroup.order', 'desc')
+    );
+
+    return result;
   }
 
   static all() {

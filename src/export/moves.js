@@ -1,6 +1,7 @@
 const path = require('path');
 const _ = require('lodash');
 const {
+  config,
   exportData,
   ignoredVersionGroupNames,
   ignoredMoveMethodNames,
@@ -26,6 +27,10 @@ async function exportTargets() {
 
   targets = _.orderBy(targets, 'id');
 
+  if (config.removeIds) {
+    targets = _.map(targets, item => _.omit(item, 'id'));
+  }
+
   return targets;
 }
 
@@ -45,6 +50,10 @@ async function exportFlags() {
   });
 
   flags = _.orderBy(flags, 'id');
+
+  if (config.removeIds) {
+    flags = _.map(flags, item => _.omit(item, 'id'));
+  }
 
   return flags;
 }
@@ -81,26 +90,47 @@ function getEffect(move) {
 }
 
 function getPokemon(move) {
-  let result = _.map(move.pokemonMoves, item => {
-    return {
-      pokemon: item.pokemon.name,
-      versionGroup: item.versionGroup.name,
-      method: item.moveMethod.name,
-      level: item.level,
-    };
+  let result = _.mapValues(move.pokemon, group => {
+    let pkmn = _.map(group, item => {
+      return {
+        versionGroup: item.versionGroup.name,
+        method: item.moveMethod.name,
+        level: item.level,
+      };
+    });
+
+    pkmn = _.reject(pkmn, item =>
+      ignoredVersionGroupNames.includes(item.versionGroup)
+    );
+    pkmn = _.reject(pkmn, item => ignoredMoveMethodNames.includes(item.method));
+
+    if (config.targetVersionGroup) {
+      pkmn = _.filter(pkmn, { versionGroup: config.targetVersionGroup });
+    }
+
+    if (config.simplePokemonMoves) {
+      pkmn = _.map(pkmn, 'method');
+      pkmn = _.uniq(pkmn);
+    }
+
+    return pkmn;
   });
-  result = _.reject(result, item =>
-    ignoredMoveMethodNames.includes(item.method)
-  );
-  result = _.reject(result, item =>
-    ignoredVersionGroupNames.includes(item.versionGroup)
-  );
-  result = _.groupBy(result, 'pokemon');
-  result = _.mapValues(result, group =>
-    _.map(group, item => _.omit(item, 'pokemon'))
-  );
+
+  result = _.omitBy(result, item => item.length === 0);
 
   return result;
+}
+
+function getFlavorText(ability) {
+  if (config.onlyLatestFlavorText) {
+    return ability.flavorText.flavor_text;
+  }
+  return _.map(ability.flavorTexts, item => {
+    return {
+      text: item.flavor_text,
+      versionGroup: item.versionGroup.name,
+    };
+  });
 }
 
 async function exportMoves() {
@@ -112,20 +142,14 @@ async function exportMoves() {
   // skip Shadow moves
   moves = _.reject(moves, move => move.type.name === 'shadow');
 
-  let isZMove, effect, flavorTexts, flags, pokemon;
+  let isZMove, effect, flavorText, flags, pokemon;
 
   moves = _.map(moves, move => {
     isZMove = move.pp === 1;
 
     effect = getEffect(move);
+    flavorText = getFlavorText(move);
     pokemon = getPokemon(move);
-
-    flavorTexts = _.map(move.flavorTexts, item => {
-      return {
-        text: item.flavor_text,
-        versionGroup: item.versionGroup.name,
-      };
-    });
 
     flags = _.map(move.flags, 'name');
 
@@ -142,7 +166,7 @@ async function exportMoves() {
       priority: move.priority,
       gen: move.generation.name,
       effect,
-      flavorTexts,
+      flavorText,
       flags,
       target: move.target.name,
       pokemon,
@@ -150,6 +174,10 @@ async function exportMoves() {
   });
 
   moves = _.orderBy(moves, 'name');
+
+  if (config.removeIds) {
+    moves = _.map(moves, item => _.omit(item, 'id'));
+  }
 
   let result;
 
