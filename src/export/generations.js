@@ -2,6 +2,7 @@ const path = require('path');
 const _ = require('lodash');
 const roman = require('romans');
 const {
+  config,
   exportData,
   ignoredVersionGroupNames,
   ignoredMoveMethodNames,
@@ -27,6 +28,10 @@ async function exportRegions() {
 
   regions = _.orderBy(regions, 'id');
 
+  if (config.removeIds) {
+    regions = _.map(regions, item => _.omit(item, 'id'));
+  }
+
   return regions;
 }
 
@@ -45,6 +50,10 @@ async function exportVersions() {
   });
 
   versions = _.orderBy(versions, 'id');
+
+  if (config.removeIds) {
+    versions = _.map(versions, item => _.omit(item, 'id'));
+  }
 
   return versions;
 }
@@ -85,6 +94,14 @@ async function exportVersionGroups() {
 
   versionGroups = _.orderBy(versionGroups, 'order');
 
+  if (config.removeIds) {
+    versionGroups = _.map(versionGroups, item => _.omit(item, 'id'));
+  }
+
+  if (config.removeRegions) {
+    versionGroups = _.map(versionGroups, item => _.omit(item, 'regions'));
+  }
+
   return versionGroups;
 }
 
@@ -119,6 +136,20 @@ async function exportGenerations() {
 
   generations = _.orderBy(generations, 'name');
 
+  if (config.removeIds) {
+    generations = _.map(generations, item => _.omit(item, 'id'));
+  }
+
+  if (config.removeRegions) {
+    generations = _.map(generations, item => _.omit(item, 'mainRegion'));
+  }
+
+  if (config.shortenGenerationInfo) {
+    generations = _.map(generations, item =>
+      _.omit(item, ['caption', 'numRoman'])
+    );
+  }
+
   return generations;
 }
 
@@ -126,17 +157,23 @@ async function exportAll(target) {
   let generations = await exportGenerations();
   let versionGroups = await exportVersionGroups();
   let versions = await exportVersions();
-  let regions = await exportRegions();
+  let regions = [];
 
   let data = {
     generations,
     versionGroups,
     versions,
-    regions,
   };
 
+  if (!config.removeRegions) {
+    regions = await exportRegions();
+
+    data.regions = regions;
+  }
+
   console.log(
-    `writing ${generations.length} generations, ${versionGroups.length} version groups, ${versions.length} versions, ${regions.length} regions...`
+    `writing ${generations.length} generations, ${versionGroups.length} version groups, ` +
+      `${versions.length} versions, ${regions.length} regions...`
   );
 
   await exportData(path.join(target, 'generations.json'), data);

@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const { exportData, ignoredTypeNames } = require('./utils');
+const { config, exportData, ignoredTypeNames } = require('./utils');
 const Type = require('../models/Type');
 const TypeEfficacy = require('../models/TypeEfficacy');
 const MoveDamageClass = require('../models/MoveDamageClass');
@@ -14,6 +14,13 @@ function getDamageFactors(efficacies, prop) {
   });
 
   result = _.orderBy(result, 'factor');
+
+  if (!config.keepDamageFactorOne) {
+    result = _.reject(result, item => item.factor === 1);
+  }
+
+  // compactify
+  result = _.map(result, item => [item.type, item.factor]);
 
   return result;
 }
@@ -112,6 +119,10 @@ async function exportTypes() {
 
   types = _.orderBy(types, 'name');
 
+  if (config.removeIds) {
+    types = _.map(types, item => _.omit(item, 'id'));
+  }
+
   return types;
 }
 
@@ -149,6 +160,10 @@ async function exportCategories() {
   });
 
   categories = _.orderBy(categories, 'name');
+
+  if (config.removeIds) {
+    categories = _.map(categories, item => _.omit(item, 'id'));
+  }
 
   return categories;
 }

@@ -3,6 +3,9 @@ const fs = require('fs-extra');
 const config = {
   prettyPrintJson: true,
   removeIds: true,
+  removeRegions: true,
+  shortenGenerationInfo: true,
+  keepDamageFactorOne: false,
   onlyLatestFlavorText: true,
   simplePokemonMoves: true,
   targetVersionGroup: 'ultra-sun-ultra-moon',
