@@ -6,6 +6,7 @@ const {
   ignoredVersionGroupNames,
 } = require('./utils');
 const Stat = require('../models/Stat');
+const Nature = require('../models/Nature');
 const Pokemon = require('../models/Pokemon');
 const PokemonMoveMethod = require('../models/PokemonMoveMethod');
 
@@ -32,6 +33,27 @@ async function exportStats() {
   stats = _.orderBy(stats, 'id');
 
   return stats;
+}
+
+async function exportNatures() {
+  console.log('loading natures...');
+  let natures = await Nature.all();
+
+  console.log(`processing ${natures.length} natures...`);
+
+  natures = _.map(natures, nature => {
+    return {
+      id: nature.id,
+      name: nature.name,
+      caption: nature.caption,
+      plus: nature.decreasedStat.name,
+      minus: nature.increasedStat.name,
+    };
+  });
+
+  natures = _.orderBy(natures, 'id');
+
+  return natures;
 }
 
 async function exportMoveMethods() {
@@ -194,15 +216,17 @@ async function exportAll(target) {
   let pokemon = await exportPokemon();
   let moveMethods = await exportMoveMethods();
   let stats = await exportStats();
+  let natures = await exportNatures();
 
   let data = {
     pokemon: pokemon.index,
     moveMethods,
     stats,
+    natures,
   };
 
   console.log(
-    `writing ${pokemon.index.length} pokemon, ${moveMethods.length} move methods, ${stats.length} stats...`
+    `writing ${pokemon.index.length} pokemon, ${moveMethods.length} move methods, ${stats.length} stats, ${natures.length}...`
   );
 
   await exportData(path.join(target, 'pokemon.json'), data);
