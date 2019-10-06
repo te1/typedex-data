@@ -52,6 +52,21 @@ npm run export
 - Knex configuration can be found in [src/knex.js](https://github.com/te1/typedex-data/blob/master/src/knex.js)
 
 
+## Potential Data Sources
+**Machine-readable**
+- [veekun/pokedex](https://github.com/veekun/pokedex) (no Let's Go data as of October 2019)
+- [oakdex-pokedex](https://github.com/jalyna/oakdex-pokedex) (some Let's Go data as of October 2019)
+- [Pokemon-Showdown](https://github.com/Zarel/Pokemon-Showdown) (seems complete but also complex)
+- [capsumon/showdown-data](https://github.com/capsumon/showdown-data) (data from Showdown converted to JSON)
+- [route1rodent/pokemon-data](https://github.com/route1rodent/pokemon-data) (data from Veekun converted to JSON)
+
+**Human-readable**
+- [Bulbapedia](https://bulbapedia.bulbagarden.net)
+- [Pokémon Database](https://pokemondb.net)
+- [Smogon](https://www.smogon.com)
+- [Serebii](https://www.serebii.net)
+
+
 ## Disclaimer
 
 Pokémon © 2002-2019 Pokémon. © 1995-2019 Nintendo/Creatures Inc./GAME FREAK inc. Pokémon and Pokémon character names are trademarks of Nintendo. No copyright or trademark infringement is intended in using Pokémon data.
