@@ -67,6 +67,10 @@ npm run export
 - [Serebii](https://www.serebii.net)
 
 
+## License
+This software is licensed under the [MIT license](https://github.com/te1/typedex-data/blob/master/LICENSE).
+
+
 ## Disclaimer
 
 Pokémon © 2002-2019 Pokémon. © 1995-2019 Nintendo/Creatures Inc./GAME FREAK inc. Pokémon and Pokémon character names are trademarks of Nintendo. No copyright or trademark infringement is intended in using Pokémon data.
