@@ -182,7 +182,7 @@ async function exportAll(target) {
     `writing ${types.length} types, ${categories.length} categories...`
   );
 
-  await exportData(path.join(target, 'types.json'), data);
+  await exportData(path.join(target, 'types.json'), data.types);
 
   console.log('done\n');
 }
