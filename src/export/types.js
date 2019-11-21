@@ -20,7 +20,8 @@ function getDamageFactors(efficacies, prop) {
   }
 
   // compactify
-  result = _.map(result, item => [item.type, item.factor]);
+  result = _.keyBy(result, 'type');
+  result = _.mapValues(result, 'factor');
 
   return result;
 }

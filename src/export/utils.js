@@ -5,7 +5,7 @@ const config = {
   removeIds: true,
   removeRegions: true,
   shortenGenerationInfo: true,
-  keepDamageFactorOne: false,
+  keepDamageFactorOne: true,
   onlyLatestFlavorText: true,
   simpleStats: true,
   simplePokemonMoves: true,
